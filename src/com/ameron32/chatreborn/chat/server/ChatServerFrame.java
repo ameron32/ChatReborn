@@ -1,0 +1,181 @@
+package com.ameron32.chatreborn.chat.server;
+
+import com.ameron32.chatreborn.R;
+import com.ameron32.chatreborn.chat.Network.MessageClass;
+
+import android.app.Activity;
+import android.content.Context;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+public class ChatServerFrame {
+	
+	final Context context;
+	final View parentView;
+	
+	private TextView tvChat;
+	private TextView tvUsers;
+	private TextView tvHost;
+
+//	private ImageButton ibSend;
+//	private EditText etMessage;
+//	private TextView tvChat, tvUsers, tvConnection;
+	private ScrollView svChatRecord;
+//	private ProgressBar pbMain;
+
+	private void init() {
+//		ibSend = (ImageButton) parentView.findViewById(R.id.ibSend2);
+//
+//		etMessage = (EditText) parentView.findViewById(R.id.etMessage2);
+//
+		tvChat = (TextView) parentView.findViewById(R.id.tvChat3);
+		tvUsers = (TextView) parentView.findViewById(R.id.tvUsers3);
+		tvHost = (TextView) parentView.findViewById(R.id.tvHost);
+//
+		svChatRecord = (ScrollView) parentView.findViewById(R.id.svChatRecord3);
+//
+//		pbMain = (ProgressBar) parentView.findViewById(R.id.pbMain2);
+//
+//		pbMain.setIndeterminate(true);
+//		pbMain.setVisibility(View.GONE);
+//		
+//		
+		tvUsers = (TextView) parentView.findViewById(R.id.tvUsers3);
+		tvChat = (TextView) parentView.findViewById(R.id.tvChat3);
+	}
+	
+	public ChatServerFrame(Context context, View v) {
+		this.context = context;
+		this.parentView = v;
+		init();
+	}
+	
+	public void setNames(final String[] userNames) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				final StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < userNames.length; i++) {
+					if (i != 0)
+						sb.append("\n");
+					sb.append(userNames[i]);
+				}
+				tvUsers.setText(sb.toString());
+			}
+		});
+	}
+	
+	public void addMessage(final MessageClass m) {
+		addMessage(m.name, m.getText(), m.getTimeStamp(), m);
+	}
+
+	public void addMessage(final String username, final String chatMessage,
+			final long serverTimeStamp, final MessageClass m) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				final int USERNAME = 0;
+				final int MESSAGE = 1;
+				// determine chain or new
+//				View chatBubble = null;
+//				LayoutInflater i = LayoutInflater.from(getActivity());
+//				boolean restart = true;
+//				
+//				ArrayList<MessageClass> chatHistory = Global.ChatOrganizer.getClientChatHistory();
+//				if (chatHistory.size() > 0) {
+//					final int last = chatHistory.size() - 1;
+//					String lastChatter = chatHistory.get(last).name;
+//
+//					if (lastChatter != null && lastChatter.equals(username)) {
+//						chatBubble = i.inflate(R.layout.chat_bubble_continue,
+//								null);
+//						restart = false;
+//					} else {
+//						chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
+//					}
+//				} else {
+//					chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
+//				}
+//
+//				if (restart) {
+//					TextView msg = (TextView) chatBubble
+//							.findViewById(R.id.tvMsg);
+//					msg.setText(chatMessage);
+//					TextView name = (TextView) chatBubble
+//							.findViewById(R.id.tvUsr);
+//					name.setText(username);
+//					TextView time = (TextView) chatBubble
+//							.findViewById(R.id.tvTimeStamp);
+//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
+//							.format(new Date(serverTimeStamp)));
+//				} else {
+//					TextView msg = (TextView) chatBubble
+//							.findViewById(R.id.tvMsgC);
+//					msg.setText(chatMessage);
+//					TextView time = (TextView) chatBubble
+//							.findViewById(R.id.tvTimeStampC);
+//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
+//							.format(new Date(serverTimeStamp)));
+//				}
+//
+//				LinearLayout chatStack = (LinearLayout) findViewById(
+//						R.id.llChat2);
+//				chatStack.addView(chatBubble);
+//				Global.Local.clientChatHistory.put(serverTimeStamp, m);
+
+				
+				
+				String allChat = tvChat.getText().toString();
+				allChat += "\n" + chatMessage;
+				tvChat.setText(allChat);
+				
+				scrollToBottomChat();
+			}
+		});
+	}
+	
+	private void scrollToBottomChat() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				svChatRecord.post(new Runnable() {
+					@Override
+					public void run() {
+						svChatRecord.fullScroll(View.FOCUS_DOWN);
+					}
+				});
+			}
+		});
+	}
+	
+	public void setHostText(String text) {
+		tvHost.setText(text);
+	}
+	
+	public void setHostAServerListener(final Runnable listener) {
+		tvHost.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				listener.run();
+			}
+		});
+	}
+	
+	private void runOnUiThread(final Runnable listener) {
+		((Activity) context).runOnUiThread(listener);
+	}
+
+	private View findViewById(int id) {
+		return ((Activity) context).findViewById(id);
+	}
+	
+	private Activity getActivity() {
+		return ((Activity) context);
+	}
+	
+}
