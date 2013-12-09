@@ -16,12 +16,14 @@ import android.os.AsyncTask;
 public class NetworkTask extends AsyncTask<String, int[], String> {
 
 	private Client client;
-	private ChatClientFrame chatFrame;
+	private ChatClientFrame chatClientFrame;
 	private Task task;
+	private String username;
 
-	public NetworkTask (Task task, Client client, ChatClientFrame chatFrame) {
+	public NetworkTask (Task task, String username, Client client, ChatClientFrame chatFrame) {
+		this.username = username;
 		this.client = client;
-		this.chatFrame = chatFrame;
+		this.chatClientFrame = chatFrame;
 		this.task = task;
 	}
 	
@@ -82,14 +84,13 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 			 if (Global.Local.hostname.equals("localhost")) {
 				 netInfo += "\n" + "Local: " + Utils.getIPAddress(true);
 			 }
-			 
-			 chatFrame.setConnectionText(netInfo);
-			 chatFrame.setNames(Global.Local.groupUsers);
-			 chatFrame.clearChatHistory();
+			 chatClientFrame.setConnectionText(netInfo);
+			 chatClientFrame.clearChatHistory();
 			 return;
 		 case StartServer:
 			 String hostInfo = Utils.getIPAddress(true) + ":" + Network.port;
 			 chatServerFrame.setHostText(hostInfo);
+			 chatServerFrame.clearChatHistory();
 			 return;
 		 }
 

@@ -1,6 +1,11 @@
 package com.ameron32.chatreborn.chat.server;
 
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+
 import com.ameron32.chatreborn.R;
+import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
 
 import android.app.Activity;
@@ -43,10 +48,6 @@ public class ChatServerFrame {
 //
 //		pbMain.setIndeterminate(true);
 //		pbMain.setVisibility(View.GONE);
-//		
-//		
-		tvUsers = (TextView) parentView.findViewById(R.id.tvUsers3);
-		tvChat = (TextView) parentView.findViewById(R.id.tvChat3);
 	}
 	
 	public ChatServerFrame(Context context, View v) {
@@ -55,15 +56,14 @@ public class ChatServerFrame {
 		init();
 	}
 	
-	public void setNames(final String[] userNames) {
+	public void resetNames() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				final StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < userNames.length; i++) {
-					if (i != 0)
-						sb.append("\n");
-					sb.append(userNames[i]);
+				for (String user : Global.Server.connectedUsers) {
+					sb.append("\n");
+					sb.append(user);
 				}
 				tvUsers.setText(sb.toString());
 			}
@@ -79,59 +79,11 @@ public class ChatServerFrame {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				final int USERNAME = 0;
-				final int MESSAGE = 1;
-				// determine chain or new
-//				View chatBubble = null;
-//				LayoutInflater i = LayoutInflater.from(getActivity());
-//				boolean restart = true;
-//				
-//				ArrayList<MessageClass> chatHistory = Global.ChatOrganizer.getClientChatHistory();
-//				if (chatHistory.size() > 0) {
-//					final int last = chatHistory.size() - 1;
-//					String lastChatter = chatHistory.get(last).name;
-//
-//					if (lastChatter != null && lastChatter.equals(username)) {
-//						chatBubble = i.inflate(R.layout.chat_bubble_continue,
-//								null);
-//						restart = false;
-//					} else {
-//						chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
-//					}
-//				} else {
-//					chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
-//				}
-//
-//				if (restart) {
-//					TextView msg = (TextView) chatBubble
-//							.findViewById(R.id.tvMsg);
-//					msg.setText(chatMessage);
-//					TextView name = (TextView) chatBubble
-//							.findViewById(R.id.tvUsr);
-//					name.setText(username);
-//					TextView time = (TextView) chatBubble
-//							.findViewById(R.id.tvTimeStamp);
-//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
-//							.format(new Date(serverTimeStamp)));
-//				} else {
-//					TextView msg = (TextView) chatBubble
-//							.findViewById(R.id.tvMsgC);
-//					msg.setText(chatMessage);
-//					TextView time = (TextView) chatBubble
-//							.findViewById(R.id.tvTimeStampC);
-//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
-//							.format(new Date(serverTimeStamp)));
-//				}
-//
-//				LinearLayout chatStack = (LinearLayout) findViewById(
-//						R.id.llChat2);
-//				chatStack.addView(chatBubble);
-//				Global.Local.clientChatHistory.put(serverTimeStamp, m);
-
-				
+				String formattedDate = new SimpleDateFormat("HH:mm", Locale.US).format(serverTimeStamp);
 				
 				String allChat = tvChat.getText().toString();
-				allChat += "\n" + chatMessage;
+				allChat += "\n" + username + "(" + formattedDate + "): "
+						+ chatMessage;
 				tvChat.setText(allChat);
 				
 				scrollToBottomChat();
@@ -162,6 +114,17 @@ public class ChatServerFrame {
 			@Override
 			public void onClick(View v) {
 				listener.run();
+			}
+		});
+	}
+	
+	public void clearChatHistory() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				String connected = "You are connected!";
+				tvChat.setText("\n" + connected + "\n");
+				scrollToBottomChat();
 			}
 		});
 	}

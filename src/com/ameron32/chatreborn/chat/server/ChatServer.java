@@ -34,14 +34,6 @@ public class ChatServer extends ChatService {
 
 	private Server server;
 
-	public Server getServer() {
-		return server;
-	}
-
-	private void setServer(Server server) {
-		this.server = server;
-	}
-
 	private void init() {
 		setServer(new Server() {
 			protected Connection newConnection() {
@@ -54,14 +46,12 @@ public class ChatServer extends ChatService {
 
 		// For consistency, the classes to be sent over the network are
 		// registered by the same method for both the client and server.
-		Network.register(getServer());
+		Network.register(server);
 
 		getServer().addListener(new Listener() {
 			public void received(Connection c, Object object) {
-				if (!(object instanceof FrameworkMessage)) {
-					Log.debug("", "ChatServer " + object.toString());
-				}
-				newChatHandling(c, object);
+				ChatConnection connection = (ChatConnection) c;
+				handleMessage(connection, object);
 			}
 
 			public void disconnected(Connection c) {
@@ -79,69 +69,23 @@ public class ChatServer extends ChatService {
 			}
 		});
 	}
+	
+	private void updateNames() {
+		// Collect the names for each connection.
+		final Connection[] connections = getServer().getConnections();
+		final ArrayList<String> names = new ArrayList<String>(
+				connections.length);
+		for (int i = connections.length - 1; i >= 0; i--) {
+			final ChatConnection connection = (ChatConnection) connections[i];
+			names.add(connection.name);
+		}
+		// Send the names to everyone.
+		final UpdateNames updateNames = new UpdateNames();
+		updateNames.names = (String[]) names.toArray(new String[names.size()]);
+		getServer().sendToAllTCP(updateNames);
+	}
 
-	// private void oldChatHandling(Connection c, Object object) {
-	//
-	// // We know all connections for this server are actually
-	// // ChatConnections.
-	// ChatConnection connection = (ChatConnection) c;
-	//
-	// if (object instanceof NamedClass) {
-	//
-	// if (connection.name != null)
-	// return;
-	// String name = ((NamedClass) object).name;
-	// if (name == null)
-	// return;
-	// name = name.trim();
-	// if (name.length() == 0)
-	// return;
-	// connection.name = name;
-	//
-	// if (object instanceof RegisterName) {
-	// // create a new server notification
-	// final SystemMessage sysMessage = new SystemMessage();
-	// sysMessage.name = "Server:[" + Utils.getIPAddress(true)
-	// + ":" + Network.port + "]";
-	// sysMessage.setText(name + " connected.");
-	//
-	// server.sendToAllExceptTCP(connection.getID(),
-	// sysMessage);
-	// // Send everyone a new list of connection names.
-	// updateNames();
-	// return;
-	// }
-	//
-	// if (object instanceof MessageClass) {
-	// String message = ((MessageClass) object).getText();
-	// if (message == null)
-	// return;
-	// message = message.trim();
-	// if (message.length() == 0)
-	// return;
-	//
-	// MessageClass mMessage;
-	// if (object instanceof ChatMessage) {
-	// mMessage = new ChatMessage();
-	// } else if (object instanceof SystemMessage) {
-	// mMessage = new SystemMessage();
-	// } else {
-	// mMessage = new MessageClass();
-	// }
-	// mMessage.name = connection.name;
-	// // mMessage.serverTimeStamp =
-	// // System.currentTimeMillis();
-	// mMessage.setText(message);
-	//
-	// Global.Server.serverChatHistory.put(
-	// mMessage.getTimeStamp(), mMessage);
-	// server.sendToAllTCP(mMessage);
-	// return;
-	// }
-	// }
-	// }
-
-	private void newChatHandling(Connection c, Object object) {
+	private void handleMessage(ChatConnection c, Object object) {
 		/**
 		 * REGISTER NAME
 		 */
@@ -166,7 +110,8 @@ public class ChatServer extends ChatService {
 					+ Network.port + "]";
 			sysMessage.setText(name + " connected.");
 
-			getServer().sendToAllExceptTCP(connection.getID(), sysMessage);
+			getServer().sendToAllTCP(sysMessage);
+			
 			// Send everyone a new list of connection names.
 			updateNames();
 			return;
@@ -211,38 +156,8 @@ public class ChatServer extends ChatService {
 			getServer().sendToAllTCP(sMessage);
 			return;
 		}
-
+		
 		// reserved for exceptions
-	}
-
-	public void startServer() {
-		if (!isRunning) {
-			init();
-			isRunning = true;
-		}
-	}
-
-	public void stopServer() {
-		if (isRunning) {
-			getServer().stop();
-			getServer().close();
-			isRunning = false;
-		}
-	}
-
-	private void updateNames() {
-		// Collect the names for each connection.
-		final Connection[] connections = getServer().getConnections();
-		final ArrayList<String> names = new ArrayList<String>(
-				connections.length);
-		for (int i = connections.length - 1; i >= 0; i--) {
-			final ChatConnection connection = (ChatConnection) connections[i];
-			names.add(connection.name);
-		}
-		// Send the names to everyone.
-		final UpdateNames updateNames = new UpdateNames();
-		updateNames.names = (String[]) names.toArray(new String[names.size()]);
-		getServer().sendToAllTCP(updateNames);
 	}
 
 	// --------------------------------------
@@ -259,77 +174,35 @@ public class ChatServer extends ChatService {
 		return super.onStartCommand(intent, flags, startId);
 	}
 
+	private void startServer() {
+		if (!isRunning) {
+			init();
+			isRunning = true;
+		}
+	}
+
 	@Override
 	public void onDestroy() {
 		stopServer();
 		super.onDestroy();
 	}
 
+	private void stopServer() {
+		if (isRunning) {
+			getServer().stop();
+			getServer().close();
+			isRunning = false;
+		}
+	}
+
+	// --------------------------------------
+	// BINDER
+	// --------------------------------------
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mBinder;
 	}
-
-	// private void oldChatHandling(Connection c, Object object) {
-	//
-	// // We know all connections for this server are actually
-	// // ChatConnections.
-	// ChatConnection connection = (ChatConnection) c;
-	//
-	// if (object instanceof NamedClass) {
-	//
-	// if (connection.name != null)
-	// return;
-	// String name = ((NamedClass) object).name;
-	// if (name == null)
-	// return;
-	// name = name.trim();
-	// if (name.length() == 0)
-	// return;
-	// connection.name = name;
-	//
-	// if (object instanceof RegisterName) {
-	// // create a new server notification
-	// final SystemMessage sysMessage = new SystemMessage();
-	// sysMessage.name = "Server:[" + Utils.getIPAddress(true)
-	// + ":" + Network.port + "]";
-	// sysMessage.setText(name + " connected.");
-	//
-	// server.sendToAllExceptTCP(connection.getID(),
-	// sysMessage);
-	// // Send everyone a new list of connection names.
-	// updateNames();
-	// return;
-	// }
-	//
-	// if (object instanceof MessageClass) {
-	// String message = ((MessageClass) object).getText();
-	// if (message == null)
-	// return;
-	// message = message.trim();
-	// if (message.length() == 0)
-	// return;
-	//
-	// MessageClass mMessage;
-	// if (object instanceof ChatMessage) {
-	// mMessage = new ChatMessage();
-	// } else if (object instanceof SystemMessage) {
-	// mMessage = new SystemMessage();
-	// } else {
-	// mMessage = new MessageClass();
-	// }
-	// mMessage.name = connection.name;
-	// // mMessage.serverTimeStamp =
-	// // System.currentTimeMillis();
-	// mMessage.setText(message);
-	//
-	// Global.Server.serverChatHistory.put(
-	// mMessage.getTimeStamp(), mMessage);
-	// server.sendToAllTCP(mMessage);
-	// return;
-	// }
-	// }
-	// }
 
 	IBinder mBinder = new MyServerBinder();
 
@@ -346,5 +219,17 @@ public class ChatServer extends ChatService {
 		public ChatServer getService() {
 			return ChatServer.this;
 		}
+	}
+	
+	// --------------------------------------
+	// GETTER/SETTER
+	// --------------------------------------
+	
+	public Server getServer() {
+		return server;
+	}
+
+	private void setServer(Server server) {
+		this.server = server;
 	}
 }

@@ -48,6 +48,10 @@ public class Network {
 		private long serverTimeStamp;
 		private String text;
 		
+		public MessageClass() {
+			setTime();
+		}
+		
 		private void setTime() {
 			serverTimeStamp = System.currentTimeMillis();
 		}

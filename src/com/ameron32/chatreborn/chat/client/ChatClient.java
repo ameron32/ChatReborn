@@ -26,7 +26,8 @@ public class ChatClient extends ChatService {
 	
 	private void init() {
 		client.start();
-
+//		Global.set();
+		
 		Network.register(client);
 
 		client.addListener(new Listener() {
@@ -38,25 +39,18 @@ public class ChatClient extends ChatService {
 
 			public void received(Connection connection, Object object) {
 				if (object instanceof UpdateNames) {
-					final UpdateNames updateNames = (UpdateNames) object;
-					Global.Local.groupUsers = updateNames.names;
+
 					return;
 				}
 
 				if (object instanceof ChatMessage) {
-					final ChatMessage chatMessage = (ChatMessage) object;
 
 					return;
 				}
 				
 				if (object instanceof SystemMessage) {
-					final SystemMessage sysMessage = (SystemMessage) object;
-					// TODO what does a system message do?
+
 					return;
-				}
-				
-				if (!(object instanceof FrameworkMessage)) {
-					Log.debug("", "ChatClient:" + object.toString());
 				}
 			}
 
@@ -66,7 +60,7 @@ public class ChatClient extends ChatService {
 		});
 	}
 	
-	public class RunListener extends AsyncTask<String, int[], String> {
+	private class RunListener extends AsyncTask<String, int[], String> {
 		Runnable listener;
 
 		public RunListener(Runnable listener) {
@@ -85,21 +79,19 @@ public class ChatClient extends ChatService {
 		}
 	}
 	
-	private void start() {
-		client = new Client();
-		init();
-	}
-	
 	private boolean isConnected = false;
 	private void connect() {
 		if (!isConnected) {
-			// TODO Auto-generated method stub
+			client = new Client();
+			init();
 		}
 	}
 	
 	private void disconnect() {
 		if (isConnected) {
-			// TODO Auto-generated method stub
+			client.stop();
+			client.close();
+			client = null;
 		}
 	}
 	
@@ -109,7 +101,6 @@ public class ChatClient extends ChatService {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		start();
 		connect();
 		return super.onStartCommand(intent, flags, startId);
 	}

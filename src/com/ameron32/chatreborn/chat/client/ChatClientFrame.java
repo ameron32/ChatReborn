@@ -26,6 +26,7 @@ import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.ameron32.chatreborn.R;
+import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.Network.ChatMessage;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
@@ -61,8 +62,6 @@ public class ChatClientFrame {
 
 		pbMain.setIndeterminate(true);
 		pbMain.setVisibility(View.GONE);
-		
-		
 	}
 
 	public ChatClientFrame(Context context, View v) {
@@ -210,60 +209,51 @@ public class ChatClientFrame {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				final int USERNAME = 0;
-				final int MESSAGE = 1;
 				// determine chain or new
-//				View chatBubble = null;
-//				LayoutInflater i = LayoutInflater.from(getActivity());
-//				boolean restart = true;
-//				
-//				ArrayList<MessageClass> chatHistory = Global.ChatOrganizer.getClientChatHistory();
-//				if (chatHistory.size() > 0) {
-//					final int last = chatHistory.size() - 1;
-//					String lastChatter = chatHistory.get(last).name;
-//
-//					if (lastChatter != null && lastChatter.equals(username)) {
-//						chatBubble = i.inflate(R.layout.chat_bubble_continue,
-//								null);
-//						restart = false;
-//					} else {
-//						chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
-//					}
-//				} else {
-//					chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
-//				}
-//
-//				if (restart) {
-//					TextView msg = (TextView) chatBubble
-//							.findViewById(R.id.tvMsg);
-//					msg.setText(chatMessage);
-//					TextView name = (TextView) chatBubble
-//							.findViewById(R.id.tvUsr);
-//					name.setText(username);
-//					TextView time = (TextView) chatBubble
-//							.findViewById(R.id.tvTimeStamp);
-//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
-//							.format(new Date(serverTimeStamp)));
-//				} else {
-//					TextView msg = (TextView) chatBubble
-//							.findViewById(R.id.tvMsgC);
-//					msg.setText(chatMessage);
-//					TextView time = (TextView) chatBubble
-//							.findViewById(R.id.tvTimeStampC);
-//					time.setText(new SimpleDateFormat("h:mm", Locale.US)
-//							.format(new Date(serverTimeStamp)));
-//				}
-//
-//				LinearLayout chatStack = (LinearLayout) findViewById(
-//						R.id.llChat2);
-//				chatStack.addView(chatBubble);
-//				Global.Local.clientChatHistory.put(serverTimeStamp, m);
+				View chatBubble = null;
+				LayoutInflater i = LayoutInflater.from(context);
+				boolean restart = true;
+				
+				final ArrayList<MessageClass> chatHistory = Global.ChatOrganizer.getClientChatHistory();
+				if (chatHistory.size() <= 1) {
+					chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
+				} else {
+					final int last = chatHistory.size() - 1;
+					String lastChatter = chatHistory.get(last).name;
 
-				
-				
-				String allChat = tvChat.getText().toString();
-				allChat += "\n" + chatMessage;
-				tvChat.setText(allChat);
+					if (lastChatter != null && lastChatter.equals(username)) {
+						chatBubble = i.inflate(R.layout.chat_bubble_continue,
+								null);
+						restart = false;
+					} else {
+						chatBubble = i.inflate(R.layout.chat_bubble_ui, null);
+					}
+				}
+
+				TextView msg, time;
+				if (restart) {
+					msg = (TextView) chatBubble
+							.findViewById(R.id.tvMsg);
+					time = (TextView) chatBubble
+							.findViewById(R.id.tvTimeStamp);
+
+					TextView name = (TextView) chatBubble
+							.findViewById(R.id.tvUsr);
+					name.setText(username);
+				} else {
+					msg = (TextView) chatBubble
+							.findViewById(R.id.tvMsgC);
+					time = (TextView) chatBubble
+							.findViewById(R.id.tvTimeStampC);
+				}
+				msg.setText(chatMessage);
+				time.setText(new SimpleDateFormat("h:mma", Locale.US)
+						.format(serverTimeStamp));
+
+				final LinearLayout chatStack = (LinearLayout) parentView.findViewById(
+						R.id.llChat2);
+				chatStack.addView(chatBubble);
+				Global.Local.clientChatHistory.put(serverTimeStamp, m);
 				
 				scrollToBottomChat();
 			}
@@ -274,16 +264,13 @@ public class ChatClientFrame {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-//				String connected = "You are connected! "
-//						+ Global.Local.hostname + ":" + Network.port;
-//				tvChat.setText("\n" + connected + "\n");
-//				tvChat.setText("");
+				String connected = "You are connected!";
+				tvChat.setText("\n" + connected + "\n");
 				scrollToBottomChat();
 			}
 		});
 	}
 
-	boolean once = true;
 	public void setConnectToServerListener(final Runnable listener) {
 		tvConnection.setOnClickListener(new OnClickListener() {
 			@Override
@@ -300,27 +287,4 @@ public class ChatClientFrame {
 	private void runOnUiThread(final Runnable listener) {
 		((Activity) context).runOnUiThread(listener);
 	}
-
-	private View findViewById(int id) {
-		return ((Activity) context).findViewById(id);
-	}
-	
-	private Activity getActivity() {
-		return ((Activity) context);
-	}
-	
-//	public void updateChat() {
-//		runOnUiThread(new Runnable() {
-//			@Override
-//			public void run() {
-//				// update display
-//				Toast.makeText(getActivity(), "update", Toast.LENGTH_LONG).show();
-//				StringBuilder stringBuilder = new StringBuilder();
-//				for (MessageClass m : Global.Local.clientChatHistory.values()) {
-//					stringBuilder.append("/n" + m.getText());
-//				}
-//				tvChat.setText(stringBuilder.toString());
-//			}
-//		});
-//	}
 }

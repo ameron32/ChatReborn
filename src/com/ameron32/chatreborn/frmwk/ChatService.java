@@ -16,21 +16,21 @@ public class ChatService extends Service {
 
 	private int START_NOTIFICATION_ID, STOP_NOTIFICATION_ID;
 	public boolean isBound = false;
-
+	
 	public int getSTOP_NOTIFICATION_ID() {
 		return STOP_NOTIFICATION_ID;
 	}
 
-	public void setSTOP_NOTIFICATION_ID(int sTOP_NOTIFICATION_ID) {
-		STOP_NOTIFICATION_ID = sTOP_NOTIFICATION_ID;
+	protected void setSTOP_NOTIFICATION_ID(int id) {
+		STOP_NOTIFICATION_ID = id;
 	}
 
 	public int getSTART_NOTIFICATION_ID() {
 		return START_NOTIFICATION_ID;
 	}
 
-	public void setSTART_NOTIFICATION_ID(int sTART_NOTIFICATION_ID) {
-		START_NOTIFICATION_ID = sTART_NOTIFICATION_ID;
+	protected void setSTART_NOTIFICATION_ID(int id) {
+		START_NOTIFICATION_ID = id;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class ChatService extends Service {
 
 	private void startNotification(int id) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.send_now)
+				context).setSmallIcon(R.drawable.ic_action_send)
 				.setContentTitle(getSimpleName() + " Started")
 				.setContentText(getSimpleName() + " Service Running");
 		Intent targetIntent = new Intent(context, MainActivity.class);
@@ -72,7 +72,7 @@ public class ChatService extends Service {
 
 	private void stopNotification(int id) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.send_now)
+				context).setSmallIcon(R.drawable.ic_action_done)
 				.setContentTitle(getSimpleName() + " Stopped")
 				.setContentText(getSimpleName() + " Service Stopped");
 
