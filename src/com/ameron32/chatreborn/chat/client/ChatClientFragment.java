@@ -1,5 +1,5 @@
 package com.ameron32.chatreborn.chat.client;
-
+import com.ameron32.knbasic.core.chat.R;
 import java.io.IOException;
 
 import android.content.ComponentName;
@@ -16,8 +16,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-import com.ameron32.chatreborn.R;
-import com.ameron32.chatreborn.R.layout;
+
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.Network.ChatMessage;
@@ -87,8 +86,12 @@ public class ChatClientFragment extends Fragment {
 	private Runnable connectToServer = new Runnable() {
 		@Override
 		public void run() {
-			new NetworkTask(Task.Connect, username, chatClient.getClient(),
-					chatFrame).execute();
+			NetworkTask task = new NetworkTask(
+					Task.Connect, 
+					username, 
+					chatClient.getClient(),
+					chatFrame);
+			task.execute();
 		}
 	};
 

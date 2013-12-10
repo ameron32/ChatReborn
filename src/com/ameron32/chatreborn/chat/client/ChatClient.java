@@ -60,28 +60,29 @@ public class ChatClient extends ChatService {
 		});
 	}
 	
-	private class RunListener extends AsyncTask<String, int[], String> {
-		Runnable listener;
-
-		public RunListener(Runnable listener) {
-			this.listener = listener;
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-			listener.run();
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
-		}
-	}
+//	private class RunListener extends AsyncTask<String, int[], String> {
+//		Runnable listener;
+//
+//		public RunListener(Runnable listener) {
+//			this.listener = listener;
+//		}
+//
+//		@Override
+//		protected String doInBackground(String... params) {
+//			listener.run();
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(String result) {
+//			super.onPostExecute(result);
+//		}
+//	}
 	
 	private boolean isConnected = false;
-	private void connect() {
+	private void connect(String host) {
 		if (!isConnected) {
+			Global.Local.hostname = host;
 			client = new Client();
 			init();
 		}
@@ -101,7 +102,7 @@ public class ChatClient extends ChatService {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		connect();
+		connect(intent.getStringExtra("host"));
 		return super.onStartCommand(intent, flags, startId);
 	}
 	

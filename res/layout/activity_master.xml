@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="24dp"
+        layout="@layout/activity_main" />
+
+    <com.ameron32.knbasic.core.chat.CustomSlidingLayer
+        xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/left_slidebar"
+        android:layout_width="@dimen/layer_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        slidingLayer:closeOnTapEnabled="true"
+        slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
+        slidingLayer:shadowWidth="@dimen/shadow_width"
+        slidingLayer:stickTo="left" >
+
+        <include layout="@layout/left_slidebar" />
+    </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
+
+    <FrameLayout
+        android:id="@+id/right_framelayout"
+        android:layout_width="@dimen/layer_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" >
+
+        <com.ameron32.knbasic.core.chat.CustomSlidingLayer
+            xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/settings_slidebar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            slidingLayer:closeOnTapEnabled="true"
+            slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
+            slidingLayer:shadowWidth="@dimen/shadow_width"
+            slidingLayer:stickTo="right" >
+
+            <include layout="@layout/settings_slidebar" />
+        </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/full_framelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" >
+
+        <View
+            android:id="@+id/vBlankSpacer"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true" />
+
+        <com.ameron32.knbasic.core.chat.CustomSlidingLayer
+            xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/chat_slidebar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/vBlankSpacer"
+            android:layout_alignParentLeft="true"
+            slidingLayer:closeOnTapEnabled="true"
+            slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
+            slidingLayer:shadowWidth="@dimen/shadow_width"
+            slidingLayer:stickTo="top" >
+
+            <include layout="@layout/chat_slidebar" />
+        </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
+    </RelativeLayout>
+
+</RelativeLayout>

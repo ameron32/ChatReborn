@@ -1,7 +1,6 @@
 package com.ameron32.chatreborn.chat.server;
 
-import com.ameron32.chatreborn.R;
-import com.ameron32.chatreborn.R.layout;
+import com.ameron32.knbasic.core.chat.R;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network.ChatMessage;
 import com.ameron32.chatreborn.chat.Network.RegisterName;
@@ -78,7 +77,11 @@ public class ChatServerFragment extends Fragment {
 		chatFrame.setHostAServerListener(new Runnable() {
 			@Override
 			public void run() {
-				new NetworkTask(Task.StartServer, chatServer.getServer(), chatFrame).execute();
+				NetworkTask task = new NetworkTask(
+						Task.StartServer, 
+						chatServer.getServer(), 
+						chatFrame);
+				task.execute();
 			}
 		});
 	}

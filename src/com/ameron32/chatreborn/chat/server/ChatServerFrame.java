@@ -3,8 +3,8 @@ package com.ameron32.chatreborn.chat.server;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import com.ameron32.knbasic.core.chat.R;
 
-import com.ameron32.chatreborn.R;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
 

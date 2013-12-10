@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ChatReborn</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="version_number">1.60</string>
+    <string name="app_name">KNBasic</string>
+    <string name="menu_settings">Settings</string>
+    <string name="hello_world">Hello world</string>
+    <string name="menu_exit">Exit</string><string name="version_number">1.6.0</string>
     
-
 </resources>

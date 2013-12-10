@@ -1,69 +1,29 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/llMain"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_scrollview"
+    style="@style/Theme.Sherlock.Light"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="10dp"
-    tools:context=".MainActivity" >
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true" >
 
     <LinearLayout
-        android:id="@+id/llButtons"
+        android:id="@+id/llPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:orientation="horizontal"
-        android:weightSum="6" >
+        android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/bServerToggle"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="0px"
+        <TextView
+            android:id="@+id/tvHello"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Toggle Server" />
-
-        <CheckBox
-            android:id="@+id/cbServer"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="" />
-
-        <Button
-            android:id="@+id/bClientToggle"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Toggle Client" />
-
-        <CheckBox
-            android:id="@+id/cbClient"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="" />
+            android:text="ABCDE"
+            android:textSize="65dp" />
+        
+        <ListView 
+            android:id="@+id/lvCards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/llServer"
-        android:layout_width="150dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/llButtons"
-        android:orientation="horizontal" />
-
-    <LinearLayout
-        android:id="@+id/llClient"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:layout_toRightOf="@+id/llServer"
-        android:layout_below="@+id/llButtons" >
-    </LinearLayout>
-
-</RelativeLayout>
+</ScrollView>

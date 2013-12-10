@@ -1,7 +1,7 @@
 package com.ameron32.chatreborn.frmwk;
 
-import com.ameron32.chatreborn.MainActivity;
-import com.ameron32.chatreborn.R;
+import com.ameron32.knbasic.core.chat.MainActivity;
+import com.ameron32.knbasic.core.chat.R;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

@@ -1,5 +1,5 @@
 package com.ameron32.chatreborn.chat.client;
-
+import com.ameron32.knbasic.core.chat.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.ameron32.chatreborn.R;
+
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.Network.ChatMessage;
