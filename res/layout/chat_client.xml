@@ -6,20 +6,6 @@
     android:layout_height="match_parent"
     android:background="#CCCCCC" >
 
-    <MultiAutoCompleteTextView
-        android:id="@+id/etMessage2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignTop="@+id/ibSend2"
-        android:layout_toLeftOf="@+id/ibSend2"
-        android:ems="10"
-        android:hint="Message" >
-
-        <requestFocus />
-    </MultiAutoCompleteTextView>
-
     <ProgressBar
         android:id="@+id/pbMain2"
         android:layout_width="50dp"
@@ -27,41 +13,20 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true" />
 
-    <ImageButton
-        android:id="@+id/ibSend2"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:background="@null"
-        android:src="@drawable/send_now" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/etMessage2"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/relativeLayout1"
-        android:gravity="bottom" >
+        android:gravity="bottom"
+        android:orientation="vertical" >
 
-        <ScrollView
-            android:id="@+id/svChatRecord2"
+        <ListView
+            android:id="@+id/lvChatHistory"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <LinearLayout
-                android:id="@+id/llChat2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/tvChat2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="chat disabled" />
-            </LinearLayout>
-        </ScrollView>
+            android:layout_height="wrap_content"
+            android:minHeight="50dp" />
     </LinearLayout>
 
     <RelativeLayout

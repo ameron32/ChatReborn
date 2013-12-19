@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.TreeMap;
 
+import com.ameron32.chatreborn.adapters.ChatAdapter;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.server.ChatServer.ChatConnection;
+import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
+import com.ameron32.chatreborn.ui.ChatClientFrame;
 
 public class Global {
 
@@ -17,8 +20,14 @@ public class Global {
 	}
 	
 	public static class Server {
-		public static final HashMap<Long, MessageClass> serverChatHistory 
-			= new HashMap<Long, MessageClass>();
+		private static final TreeMap<Long, MessageClass> serverChatHistory 
+			= new TreeMap<Long, MessageClass>();
+		public static void addToHistory(MessageClass mc) {
+			serverChatHistory.put(mc.getTimeStamp(), mc);
+		}
+		public static TreeMap<Long, MessageClass> getServerChatHistory() {
+			return new TreeMap<Long, MessageClass>(serverChatHistory);
+		}
 		public static final ArrayList<String> connectedUsers 
 			= new ArrayList<String>();
 		public static void removeUser(String s) {
@@ -33,23 +42,39 @@ public class Global {
 		public static String hostname = "localhost";
 		
 		public static String[] groupUsers = { "" };
-		public static final HashMap<Long, MessageClass> clientChatHistory 
-			= new HashMap<Long, MessageClass>();
+		private static final TreeMap<Long, MessageClass> clientChatHistory 
+			= new TreeMap<Long, MessageClass>();
+		public static TreeMap<Long, MessageClass> getClientChatHistory() {
+			return clientChatHistory;
+		}
+		public static void addToHistory(TreeMap<Long, MessageClass> additions) {
+			clientChatHistory.putAll(additions);
+//			notifyFrames();
+		}
+		public static void addToHistory(MessageClass mc) {
+			clientChatHistory.put(mc.getTimeStamp(), mc);
+//			notifyFrames();
+		}
+		public static void unpackServerHistory(TreeMap<Long, MessageClass> historyBundle) {
+			clientChatHistory.clear();
+			addToHistory(historyBundle);
+//			notifyFrames();
+		}
+		public static void clearChatHistory() {
+			clientChatHistory.clear();
+		}
+		
+
+		
+//		private static ArrayList<ChatClientFrame> frames = new ArrayList<ChatClientFrame>(); 
+//		public static void addFrame(ChatClientFrame cf) {
+//			frames.add(cf);
+//		}
+//		private static void notifyFrames() {
+//			for (ChatClientFrame cf : frames) {
+//				cf.refreshChatHistory();
+//			}
+//		}
 	}
 	
-	public static class ChatOrganizer {
-		public static ArrayList<MessageClass> getClientChatHistory() {
-			ArrayList<MessageClass> values = new ArrayList<MessageClass>(Global.Local.clientChatHistory.values());
-			if (values != null && values.size() > 0) {
-				Collections.sort(values, new Comparator<MessageClass>() {
-					@Override
-					public int compare(MessageClass lhs, MessageClass rhs) {
-						return Long.signum(lhs.getTimeStamp()
-								- rhs.getTimeStamp());
-					}
-				});
-			}
-			return values;
-		}
-	}
 }

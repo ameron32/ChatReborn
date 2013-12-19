@@ -1,5 +1,7 @@
 package com.ameron32.chatreborn.chat;
 
+import java.util.TreeMap;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 
@@ -15,6 +17,8 @@ public class Network {
 		kryo.register(UpdateNames.class);
 		kryo.register(ChatMessage.class);
 		kryo.register(SystemMessage.class);
+		kryo.register(ServerChatHistory.class);
+		kryo.register(TreeMap.class);
 	}
 
 	static public class UpdateNames {
@@ -77,7 +81,40 @@ public class Network {
 	
 	// NEW
 	static public class SystemMessage extends MessageClass {
-
+		private boolean isHistoryRequest = false;
+		public void setIsHistoryRequest(boolean b) {
+			isHistoryRequest = b;
+		}
+		public boolean getIsHistoryRequest() {
+			return isHistoryRequest;
+		}
+	}
+	
+	static public class ServerChatHistory extends NamedClass {
+		private long serverTimeStamp;
+		public ServerChatHistory() {
+			setTime();
+		}
+		private void setTime() {
+			serverTimeStamp = System.currentTimeMillis();
+		}
+		public long getTimeStamp() {
+			return serverTimeStamp;
+		}
+		
+		// History
+		private final TreeMap<Long, MessageClass> chatHistoryBundle 
+				= new TreeMap<Long, MessageClass>();
+		public void loadHistory(TreeMap<Long, MessageClass> history) {
+			Long[] keySet = history.keySet().toArray(new Long[0]);
+			for (int i = 0; i < history.size(); i++) {
+				long key = keySet[i];
+				chatHistoryBundle.put(key, history.get(key));
+			}
+		}
+		public TreeMap<Long, MessageClass> getHistoryBundle() {
+			return chatHistoryBundle;
+		}
 	}
 	
 }

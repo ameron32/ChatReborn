@@ -12,29 +12,39 @@
         android:layout_margin="24dp"
         layout="@layout/activity_main" />
 
-    <com.ameron32.knbasic.core.chat.CustomSlidingLayer
-        xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/left_slidebar"
+    <RelativeLayout
+        android:id="@+id/left_rl"
         android:layout_width="@dimen/layer_width"
         android:layout_height="match_parent"
+        android:layout_above="@+id/stSendBar"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        slidingLayer:closeOnTapEnabled="true"
-        slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
-        slidingLayer:shadowWidth="@dimen/shadow_width"
-        slidingLayer:stickTo="left" >
+        android:layout_alignParentTop="true" >
 
-        <include layout="@layout/left_slidebar" />
-    </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
+        <com.ameron32.knbasic.core.helpers.CustomSlidingLayer
+            xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/left_slidebar"
+            android:layout_width="@dimen/layer_width"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            slidingLayer:closeOnTapEnabled="true"
+            slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
+            slidingLayer:shadowWidth="@dimen/shadow_width"
+            slidingLayer:stickTo="left" >
 
-    <FrameLayout
-        android:id="@+id/right_framelayout"
+            <include layout="@layout/left_slidebar" />
+        </com.ameron32.knbasic.core.helpers.CustomSlidingLayer>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/right_rl"
         android:layout_width="@dimen/layer_width"
         android:layout_height="match_parent"
+        android:layout_above="@+id/stSendBar"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" >
 
-        <com.ameron32.knbasic.core.chat.CustomSlidingLayer
+        <com.ameron32.knbasic.core.helpers.CustomSlidingLayer
             xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
             android:id="@+id/settings_slidebar"
             android:layout_width="match_parent"
@@ -45,37 +55,80 @@
             slidingLayer:stickTo="right" >
 
             <include layout="@layout/settings_slidebar" />
-        </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
-    </FrameLayout>
+        </com.ameron32.knbasic.core.helpers.CustomSlidingLayer>
+    </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/full_framelayout"
+        android:id="@+id/bottom_rl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/stSendBar"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" >
+        android:layout_below="@+id/llNotifications" >
 
-        <View
-            android:id="@+id/vBlankSpacer"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true" />
-
-        <com.ameron32.knbasic.core.chat.CustomSlidingLayer
+        <com.ameron32.knbasic.core.helpers.CustomSlidingLayer
             xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
             android:id="@+id/chat_slidebar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/vBlankSpacer"
             android:layout_alignParentLeft="true"
             slidingLayer:closeOnTapEnabled="true"
             slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
             slidingLayer:shadowWidth="@dimen/shadow_width"
-            slidingLayer:stickTo="top" >
+            slidingLayer:stickTo="bottom" >
 
             <include layout="@layout/chat_slidebar" />
-        </com.ameron32.knbasic.core.chat.CustomSlidingLayer>
+        </com.ameron32.knbasic.core.helpers.CustomSlidingLayer>
     </RelativeLayout>
+    
+    <com.ameron32.knbasic.core.helpers.InternalNotification
+                android:id="@+id/iNotify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/stSendBar"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="25dp" />
+<!-- 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/stSendBar"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="25dp" >
+
+        <include layout="@layout/chat_notification_overlay" />
+    </RelativeLayout>
+-->
+
+    <LinearLayout
+        android:id="@+id/llNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="#CCCCCCCC"
+        android:maxHeight="32dp"
+        android:minHeight="32dp"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/ivBlank"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="#CCCCCC"
+            android:src="@drawable/navigation_cancel" />
+    </LinearLayout>
+
+    <com.ameron32.chatreborn.helpers.SendText
+        android:id="@+id/stSendBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/white"
+        android:ems="10"
+        android:hint="offline"
+        android:maxHeight="200dp"
+        android:padding="10dp" />
 
 </RelativeLayout>

@@ -2,15 +2,21 @@ package com.ameron32.knbasic.core.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ameron32.knbasic.core.chat.Loader.Fonts;
+import com.ameron32.knbasic.core.helpers.Loader;
+import com.ameron32.knbasic.core.helpers.Loader.Fonts;
+import com.google.android.voiceime.VoiceRecognitionTrigger;
 import com.loopj.android.image.SmartImageView;
 
 import fr.castorflex.android.flipimageview.library.FlipImageView;
@@ -28,9 +34,9 @@ public class MainActivity extends MasterActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		tv = (TextView) findViewById(R.id.tvHello);
-
+		
 		// create and configure new custom settings buttons in the sliding menu
+		// -------------------------------------------------------------------------
 		addMenuButton("Toggle Server/Client", 2, new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -68,16 +74,42 @@ public class MainActivity extends MasterActivity {
 				showMessage("Not yet implemented", true);
 			}
 		});
-
-		// demo textview font-switch
-		tv.setTypeface(Loader.fonts.get(Fonts.temphisdirty));
+		
 
 		// change the font of the titlebar in ActionBar Sherlock
+		// -------------------------------------------------------------------------
 		getCustomTitle().setTypeface(Loader.fonts.get(Fonts.temphisdirty));
 		getCustomTitle().setTextSize(getCustomTitle().getTextSize() * 1.5f);
 
+		
+		// instantiate primary fragment
+		// -------------------------------------------------------------------------
+		fm = getSupportFragmentManager();
+		FragmentTransaction ftStarter = fm.beginTransaction();
+		StarterFragment sf = new StarterFragment();
+		ftStarter.add(R.id.llPrimary, sf);
+		ftStarter.commit();
 	}
+	FragmentManager fm;
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		replaceFragment();
+	}
+	
+	private void replaceFragment() {
+		FragmentTransaction ftStarter = fm.beginTransaction();
+		StarterFragment sf = new StarterFragment();
+		
+		// why do i have to have this or it duplicates the ftStarter?
+		ftStarter.replace(R.id.llPrimary, sf);
+		ftStarter.addToBackStack(null);
+		ftStarter.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+		ftStarter.commit();
+	}
+	
 	@Override
 	protected void onPostResume() {
 		super.onPostResume();

@@ -7,12 +7,14 @@
 
     <LinearLayout
         android:id="@+id/llChatServerHolder"
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="8dp"
         android:background="#CCCCCC"
+        android:minWidth="0px"
+        android:maxWidth="150dp"
         android:orientation="vertical" >
     </LinearLayout>
 

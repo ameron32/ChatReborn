@@ -12,23 +12,36 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.ameron32.chatreborn.chat.client.ChatClient;
-import com.ameron32.chatreborn.chat.client.ChatClientFragment;
-import com.ameron32.chatreborn.chat.server.ChatServer;
-import com.ameron32.chatreborn.chat.server.ChatServerFragment;
+import com.ameron32.chatreborn.chat.ChatListener;
+import com.ameron32.chatreborn.chat.Network.ChatMessage;
+import com.ameron32.chatreborn.chat.Network.MessageClass;
+import com.ameron32.chatreborn.chat.Network.RegisterName;
+import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
+import com.ameron32.chatreborn.chat.Network.SystemMessage;
+import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.fragments.ChatClientFragment;
+import com.ameron32.chatreborn.fragments.ChatServerFragment;
+import com.ameron32.chatreborn.helpers.SendText;
+import com.ameron32.chatreborn.services.ChatClient;
+import com.ameron32.chatreborn.services.ChatServer;
+import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
+import com.ameron32.knbasic.core.helpers.CustomSlidingLayer;
+import com.ameron32.knbasic.core.helpers.InternalNotification;
+import com.ameron32.knbasic.core.helpers.Loader;
 import com.michaelflisar.messagebar.MessageBar;
 import com.michaelflisar.messagebar.messages.BaseMessage;
 import com.michaelflisar.messagebar.messages.TextMessage;
@@ -114,17 +127,18 @@ public class MasterActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_master);
 
-		// Initializations by Library Name, see respective areas below for
-		// methods
+		// Initializations by Library Name, 
+		// see respective areas below for methods
 		actionbarSherlockInit();
 		messageBarInit();
 		slidingLayerInit();
 		universalImageLoaderInit();
+		kryonetInit();
 
 		// Load memory
 		Loader.run(this);
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -149,6 +163,26 @@ public class MasterActivity
 		settingsSlider.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		
 		return true;
+	}
+	
+	int openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.NULL_ID;
+	@Override
+	protected void onPause() {
+		// remember and close sliders for reopening in onResume
+		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
+		CustomSlidingLayer.closeAllSlidingLayers();
+		
+		super.onPause();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		// reopen sliders closed when onPause
+		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
+			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
+		}
 	}
 
 	@Override
@@ -318,6 +352,9 @@ public class MasterActivity
 	// ------------------------------------------------------------------------------------------------
 
 	private FragmentManager fm;
+	protected FragmentManager getMasterFragmentManager() {
+		return fm;
+	}
 	private Intent cSs, cCs;
 	private ChatServerFragment sFragment;
 	private ChatClientFragment cFragment;
@@ -332,27 +369,50 @@ public class MasterActivity
 	}
 	
 	protected void promptClient() {
-		final EditText etHost = new EditText(MasterActivity.this);
+		final AutoCompleteTextView etHost = new AutoCompleteTextView(MasterActivity.this);
 		etHost.setHint("Ex: \"192.168.254.254\" or \"localhost\"");
 		
-		new AlertDialog.Builder(MasterActivity.this)
+		final AlertDialog connection = new AlertDialog.Builder(MasterActivity.this)
 		.setTitle("Host IP")
 		.setPositiveButton("Connect", new Dialog.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
-				
-				final String hostIP = etHost.getText().toString().trim();
-				if (hostIP.equalsIgnoreCase("localhost")) {
-					startServer();
-				}
-						
-				startClient(hostIP);
+				startConnect(etHost);
 			}
 		})
 		.setView(etHost)
-		.create()
-		.show();
+		.create();
+
+		etHost.setOnKeyListener(new EditText.OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if ((event.getAction() == KeyEvent.ACTION_DOWN)
+						&& (keyCode == KeyEvent.KEYCODE_ENTER)
+						&& (!event.isShiftPressed())) {
+					connection.dismiss();
+					startConnect(etHost);
+					return true;
+				}
+				return false;
+			}
+
+		});
+		
+		connection.show();
+	}
+	
+	private void startConnect(EditText etHost) {
+		final String hostIP = etHost.getText().toString().trim();
+		if (hostIP.equalsIgnoreCase("localhost") || hostIP.equalsIgnoreCase("")) {
+			startServer();
+		}
+				
+		startClient(hostIP);
+	}
+	
+	private void kryonetInit() {
+
 	}
 	
 	private void startServer() {
@@ -393,13 +453,104 @@ public class MasterActivity
 			cCs.putExtra("host", host);
 			startService(cCs);
 			
+			initClient();
+			
 			isClientRunning = !isClientRunning;
 		}
 	}
 	
+	InternalNotification iNotify;
+	private void initClient() {
+		// initSendBar
+		// --------------------------------------------------------------
+		final SendText stSendBar = (SendText) findViewById(R.id.stSendBar);
+		stSendBar.setConnected(true);
+		stSendBar.setHint("Message");
+		stSendBar.setSendListener(new Runnable() {
+			@Override
+			public void run() {
+				final String msg = stSendBar.getText().toString().trim();
+				if (msg != null && msg.length() > 0) {
+					cFragment.sendMessage(msg);
+				}
+			}
+		});
+
+
+		// initNotificationFader
+		// --------------------------------------------------------------
+		iNotify = (InternalNotification) findViewById(R.id.iNotify);
+
+		ChatListener chatClientListener = new ChatListener() {
+		
+			@Override
+			protected void received(
+					ChatConnection chatConnection,
+					ServerChatHistory serverChatHistory) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			protected void received(
+					ChatConnection chatConnection,
+					MessageClass messageClass) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			protected void received(
+					ChatConnection chatConnection,
+					SystemMessage systemMessage) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			protected void received(
+					final ChatConnection chatConnection,
+					final ChatMessage chatMessage) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						iNotify.show(chatMessage.name + ": " + chatMessage.getText(), 3000);
+					}
+				});
+			}
+			
+			@Override
+			protected void received(ChatConnection chatConnection,
+					UpdateNames updateNames) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			protected void received(ChatConnection chatConnection,
+					RegisterName registerName) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			protected void disconnected(final ChatConnection chatConnection) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						iNotify.show("Exited: " + chatConnection.name, 2000);
+					}
+				});
+			}
+		};
+
+		cFragment.addChatClientListener(chatClientListener);
+	}
 	
 	private void stopClient() {
 		if (isClientRunning) {
+			termClient();
+			
 			stopService(cCs);
 
 			FragmentTransaction ftClient = fm.beginTransaction();
@@ -409,8 +560,23 @@ public class MasterActivity
 			isClientRunning = !isClientRunning;
 		}
 	}
+	
+	private void termClient() {
+		SendText stSendBar = (SendText) findViewById(R.id.stSendBar);
+		stSendBar.setConnected(false);
+		stSendBar.setHint("offline");
+		stSendBar.setSendListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+	}
+	
 
+	// ------------------------------------------------------------------------------------------------
 	// Universal Image Loader
+	// ------------------------------------------------------------------------------------------------
 	
 	private ImageLoader imageLoader;
 	public ImageLoader getImageLoader() {

@@ -35,7 +35,14 @@ public class ChatService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		isBound = true;
 		return getMyBinder();
+	}
+	
+	@Override
+	public boolean onUnbind(Intent intent) {
+		isBound = false;
+		return super.onUnbind(intent);
 	}
 
 	@Override
@@ -58,9 +65,10 @@ public class ChatService extends Service {
 
 	private void startNotification(int id) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.ic_action_send)
+				context).setSmallIcon(R.drawable.like)
 				.setContentTitle(getSimpleName() + " Started")
-				.setContentText(getSimpleName() + " Service Running");
+				.setContentText("Click to Open Application");
+
 		Intent targetIntent = new Intent(context, MainActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -72,9 +80,9 @@ public class ChatService extends Service {
 
 	private void stopNotification(int id) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.ic_action_done)
+				context).setSmallIcon(R.drawable.delete)
 				.setContentTitle(getSimpleName() + " Stopped")
-				.setContentText(getSimpleName() + " Service Stopped");
+				.setContentText("Click to Open Application");
 
 		Intent targetIntent = new Intent(context, MainActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
@@ -105,5 +113,24 @@ public class ChatService extends Service {
 	protected void setMyBinder(IBinder myBinder) {
 		this.myBinder = myBinder;
 	}
-
+	
+	private static final int MESSAGE_NOTIFICATIONS = 99;
+	public void notifyMessage(String msg) {
+		createNotification(msg, "Click to OpenApplication", MESSAGE_NOTIFICATIONS);
+	}
+	
+	private void createNotification(String title, String text, int id) {
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				context).setSmallIcon(R.drawable.chess)
+				.setContentTitle(title)
+				.setContentText(text);
+		Intent targetIntent = new Intent(context, MainActivity.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+				targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		builder.setContentIntent(contentIntent);
+		builder.setAutoCancel(true);
+		
+		NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nManager.notify(getSTOP_NOTIFICATION_ID(), builder.build());
+	}
 }
