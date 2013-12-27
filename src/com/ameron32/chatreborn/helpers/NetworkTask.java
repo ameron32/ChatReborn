@@ -8,51 +8,52 @@ import com.ameron32.chatreborn.chat.Network.MessageClass;
 import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
 import com.ameron32.chatreborn.chat.Utils;
 import com.ameron32.chatreborn.chat.Global.Local;
+import com.ameron32.chatreborn.services.ChatClient;
+import com.ameron32.chatreborn.services.ChatServer;
 import com.ameron32.chatreborn.ui.ChatClientFrame;
 import com.ameron32.chatreborn.ui.ChatServerFrame;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Server;
+import com.esotericsoftware.minlog.Log;
 
 import android.os.AsyncTask;
 
 public class NetworkTask extends AsyncTask<String, int[], String> {
 
+	private ChatClient chatClient;
 	private Client client;
 	private ChatClientFrame chatClientFrame;
 	private Task task;
 	private String username;
 
-	public NetworkTask (Task task, String username, Client client, ChatClientFrame chatFrame) {
+	public NetworkTask (Task task, String username, ChatClient chatClient, ChatClientFrame chatFrame) {
 		this.username = username;
-		this.client = client;
+		this.chatClient = chatClient;
+		this.client = chatClient.getClient();
 		this.chatClientFrame = chatFrame;
 		this.task = task;
 	}
 	
+	private ChatServer chatServer;
 	private Server server;
 	private ChatServerFrame chatServerFrame;
-	public NetworkTask (Task task, Server server, ChatServerFrame chatServerFrame) {
-		this.server = server;
+	public NetworkTask (Task task, ChatServer chatServer, ChatServerFrame chatServerFrame) {
+		this.server = chatServer.getServer();
+		this.chatServer = chatServer;
 		this.chatServerFrame = chatServerFrame;
 		this.task = task;
 	}
 	
 	private MessageClass msg;
-	public NetworkTask (Task task, Client client, MessageClass msg) {
-		this.client = client;
+	public NetworkTask (Task task, ChatClient chatClient, MessageClass msg) {
+		this.chatClient = chatClient;
+		this.client = chatClient.getClient();
 		this.task = task;
 		this.msg = msg;
 	}
 	
-//	private ServerChatHistory history;
-//	public NetworkTask (Task task, Server server, ServerChatHistory history) {
-//		this.server = server;
-//		this.task = task;
-//		this.history = history;
-//	}
-	
 	public enum Task {
-		Connect,						// client 
+		Discover, Connect,				// client 
 		SendMessage, 					// BOTH
 		StartServer, SendHistory 		// server
 	}
@@ -60,31 +61,39 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 	@Override
 	protected String doInBackground(String... params) {
 		switch (task) {
+		case Discover:
+		
+			return null;
 		case Connect:
 			try {
+				Log.error("CLIENT CONNECTING TO SERVER");
 				client.connect(5000, Global.Local.hostname, Network.port);
 				// Server communication after connection can go
 				// here, or in listener#connected().
 			
+				chatClient.setIsConnected(true);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 			return null;
 		case StartServer:
 			try {
+				Log.error("SERVER STARTING");
 				server.bind(Network.port);
 				server.start();
+				
+				chatServer.setIsRunning(true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
 		case SendMessage:
             client.sendTCP(msg);
 			return null;
-//		case SendHistory:
-//			server.sendToAllTCP(history);
-//			return null;
+		case SendHistory:
+			break;
+		default:
+			break;
 		}
 		return null;
 	}
@@ -92,17 +101,16 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		// pbMain.setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
-		// pbMain.setVisibility(View.INVISIBLE);
-		//
-
 		 
 		 switch (task) {
+		 case Discover:
+			 
+			 break;
 		 case Connect:
 			 String netInfo = Global.Local.hostname + ":" + Network.port;
 			 if (Global.Local.hostname.equals("localhost")) {
@@ -116,6 +124,12 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 			 chatServerFrame.setHostText(hostInfo);
 			 chatServerFrame.clearChatHistory();
 			 return;
+		case SendHistory:
+			break;
+		case SendMessage:
+			break;
+		default:
+			break;
 		 }
 
 	}

@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.ameron32.chatreborn.adapters.ChatAdapter;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.knbasic.core.chat.R;
+import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
+import com.fortysevendeg.swipelistview.SwipeListView;
 
 public class ChatClientFrame {
 
@@ -29,11 +31,11 @@ public class ChatClientFrame {
 
 		pbMain = (ProgressBar) parentView.findViewById(R.id.pbMain2);
 
-		lvChatHistory = (ListView) parentView.findViewById(R.id.lvChatHistory);
+		slvChatHistory = (SwipeListView) parentView.findViewById(R.id.slvChatHistory);
 		chatAdapter = new ChatAdapter(context, Global.Local.getClientChatHistory());
-		lvChatHistory.setAdapter(chatAdapter);
-		lvChatHistory.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-		lvChatHistory.setOnItemClickListener(new ListView.OnItemClickListener() {
+		slvChatHistory.setAdapter(chatAdapter);
+		slvChatHistory.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+		slvChatHistory.setOnItemClickListener(new ListView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, 
 					View v, int position, long id) {
@@ -41,6 +43,17 @@ public class ChatClientFrame {
 						position + " clicked. [" + chatAdapter.getItem(position).getText() + "]", 
 						Toast.LENGTH_LONG).show();
 			}
+		});
+		slvChatHistory.setSwipeListViewListener(
+		 new BaseSwipeListViewListener() {
+			@Override
+			public void onDismiss(int[] reverseSortedPositions) {
+				for (int position : reverseSortedPositions) {
+					chatAdapter.remove(position);
+				}
+				chatAdapter.notifyDataSetChanged();
+			}
+			
 		});
 		
 		pbMain.setIndeterminate(true);
@@ -68,10 +81,10 @@ public class ChatClientFrame {
 		});
 	}
 
-	Runnable notifyChange;
-	public void setUITask(final Runnable listener) {
-		notifyChange = listener;
-	}
+//	Runnable notifyChange;
+//	public void setUITask(final Runnable listener) {
+//		notifyChange = listener;
+//	}
 
 	public void scrollToBottomChat() {
 		runOnUiThread(new Runnable() {
@@ -80,25 +93,25 @@ public class ChatClientFrame {
 				svChatRecord.post(new Runnable() {
 					@Override
 					public void run() {
-						svChatRecord.fullScroll(View.FOCUS_DOWN);
-						lvChatHistory.setSelection(chatAdapter.getCount() - 1);
+//						svChatRecord.fullScroll(View.FOCUS_DOWN);
+						slvChatHistory.setSelection(chatAdapter.getCount() - 1);
 					}
 				});
 			}
 		});
 	}
 	
-	private ListView lvChatHistory;
-	public ChatAdapter chatAdapter;
+	private SwipeListView slvChatHistory;
+	private ChatAdapter chatAdapter;
 	public void clearChatHistory() {
-		if (lvChatHistory != null) {
+		if (slvChatHistory != null) {
 			chatAdapter.clear();
 		}
 	}
 	
 	public void refreshChatHistory() {
 		if (chatAdapter != null) {
-			lvChatHistory.post(new Runnable() {
+			slvChatHistory.post(new Runnable() {
 				@Override
 				public void run() {
 					chatAdapter.notifyDataSetChanged();

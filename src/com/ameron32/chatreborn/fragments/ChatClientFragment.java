@@ -24,7 +24,6 @@ import com.ameron32.chatreborn.chat.Network.SystemMessage;
 import com.ameron32.chatreborn.chat.Network.UpdateNames;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
-import com.ameron32.chatreborn.helpers.UITask;
 import com.ameron32.chatreborn.services.ChatClient;
 import com.ameron32.chatreborn.services.ChatClient.MyClientBinder;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
@@ -62,14 +61,13 @@ public class ChatClientFragment extends Fragment {
 		super.onStart();
 	}
 	
-	private void initChatFrame() {
-		chatFrame.setConnectToServerListener(connectToServer);
-		chatFrame.setUITask(new Runnable() {
-			@Override
-			public void run() {
-				new UITask(getActivity(), chatFrame).execute();
-			}
-		});
+	@Override
+	public void onStop() {
+		super.onStop();
+	}
+	
+	private void initChatClientFrame() {
+
 	}
 	
 	@Override
@@ -78,9 +76,10 @@ public class ChatClientFragment extends Fragment {
 
 		getActivity().bindService(new Intent(getActivity(), ChatClient.class), mConnection, ContextWrapper.BIND_AUTO_CREATE);
 		chatClientListener2.setDisabled(false);
-		chatFrame = new ChatClientFrame(getActivity(), getView());
-		initChatFrame();
+		if (chatFrame == null) 
+			chatFrame = new ChatClientFrame(getActivity(), getView());
 
+//		initChatClientFrame();
 	}
 	
 	@Override
@@ -92,9 +91,12 @@ public class ChatClientFragment extends Fragment {
 		chatFrame = null;
 	}
 	
-	@Override
-	public void onStop() {
-		super.onStop();
+	private void initiateConnectionToServer() {
+		connectToServer.run();
+	}
+	
+	private void initiateDisconnectFromServer() {
+		// nothing yet
 	}
 	
 	// ----------------------------------------
@@ -112,61 +114,19 @@ public class ChatClientFragment extends Fragment {
 
 	private final ChatListener chatClientListener2 = new ChatListener() {
 		@Override
-		protected void connected() {
-
-		}
-
-		@Override
-		protected void received(ChatConnection chatConnection,
-				ServerChatHistory serverChatHistory) {
-		}
-
-		@Override
-		protected void received(ChatConnection chatConnection,
-				MessageClass messageClass) {
-
-		}
-
-		@Override
-		protected void received(ChatConnection chatConnection,
-				final SystemMessage systemMessage) {
-			if (getActivity() != null) {
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						Toast.makeText(getActivity(),
-								"CC-Sys: " + systemMessage.getText(),
-								Toast.LENGTH_SHORT).show();
-					}
-				});
-			}
-		}
-
-		@Override
-		protected void received(ChatConnection chatConnection,
-				ChatMessage chatMessage) {
-		}
-
-		@Override
-		protected void received(ChatConnection chatConnection,
-				UpdateNames updateNames) {
+		protected void received(final UpdateNames updateNames, final ChatConnection chatConnection) {
 			chatFrame.setNames(updateNames.names);
 		}
 
 		@Override
-		protected void received(ChatConnection chatConnection,
-				RegisterName registerName) {
-
-		}
-
-		@Override
-		protected void disconnected(ChatConnection chatConnection) {
-
+		protected void disconnected(final ChatConnection chatConnection) {
+			
 		}
 		
 		@Override
-		protected void onReceivedComplete() {
-			chatFrame.refreshChatHistory();
+		protected void onReceivedComplete(boolean wasChatObjectReceived) {
+//			if (wasChatObjectReceived)
+				chatFrame.refreshChatHistory();
 		}
 	};
 
@@ -178,7 +138,7 @@ public class ChatClientFragment extends Fragment {
 				chatMessage.setText(msg);
 				if (isBound_mConnection) {
 					NetworkTask task = new NetworkTask(Task.SendMessage,
-							chatClient.getClient(), chatMessage);
+							chatClient, chatMessage);
 					task.execute();
 				} else {
 					Log.error(getClass().getSimpleName(),
@@ -189,37 +149,14 @@ public class ChatClientFragment extends Fragment {
 		r.run();
 	}
 
-//	private void requestChatHistoryFromServer() {
-//		Runnable r = new Runnable() {
-//			public void run() {
-//
-//			}
-//		};
-//		r.run();
-//	}
-
-//	private Runnable sendAction = new Runnable() {
-//		public void run() {
-//			final SystemMessage actionMessage = new SystemMessage();
-//			actionMessage.name = username;
-//			actionMessage.setText("test Action");
-//			if (isBound_mConnection) {
-//				chatClient.getClient().sendTCP(actionMessage);
-//			} else {
-//				Log.error(getClass().getSimpleName(), "ChatClient not bound");
-//			}
-//		}
-//	};
-
 	private Runnable connectToServer = new Runnable() {
 		@Override
 		public void run() {
 			NetworkTask task = new NetworkTask(Task.Connect, username,
-					chatClient.getClient(), chatFrame);
+					chatClient, chatFrame);
 			task.execute();
 		}
 	};
-
 	
 	// ----------------------------------------
 	// SERVICECONNECTION HANDLING
@@ -234,10 +171,17 @@ public class ChatClientFragment extends Fragment {
 			if (chatClient != null) {
 				isBound_mConnection = true;
 				chatClient.isBound = true;
-				
-				addDefaultListeners();
-				for (Listener l : chatClientListeners) {
-					chatClient.getClient().addListener(l);
+
+				// TODO surround this with a "isConnected" catch (to prevent
+				// unnecessary restarts of the client)
+				if (!chatClient.getIsConnected() && chatClient.getIsPrepared()) {
+//				if (chatClient.getIsPrepared() && !chatClient.getIsConnected()) {
+					addDefaultListeners();
+					for (Listener l : chatClientListeners) {
+						chatClient.getClient().addListener(l);
+					}
+
+					initiateConnectionToServer();
 				}
 			} else {
 				Toast.makeText(getActivity(), 
@@ -251,8 +195,11 @@ public class ChatClientFragment extends Fragment {
 			if (chatClient != null) {
 				isBound_mConnection = false;
 				chatClient.isBound = false;
-				for (Listener l : chatClientListeners) {
-					chatClient.getClient().removeListener(l);
+		
+				if (chatClient.getIsConnected()) {
+					for (Listener l : chatClientListeners) {
+						chatClient.getClient().removeListener(l);
+					}
 				}
 			} else {
 				Toast.makeText(getActivity(), 
@@ -261,11 +208,5 @@ public class ChatClientFragment extends Fragment {
 			}
 		}
 	}
-	
-
-	// ----------------------------------------
-	// OLD REFERENCE CODE
-	// ----------------------------------------
-	
 
 }

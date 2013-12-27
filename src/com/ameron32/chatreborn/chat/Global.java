@@ -13,7 +13,14 @@ import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
 import com.ameron32.chatreborn.ui.ChatClientFrame;
 
 public class Global {
+	/**
+	 * WARNING, THIS CLASS IS NOT THREAD-SAFE. THAT'S PROBABLY WHY ON RARE OCCASSIONS
+	 * THE APPLICATION WILL CRASH WHEN THE TREEMAPS ARE ALTERED FROM MULTIPLE THREADS.
+	 */
 
+	/**
+	 * 
+	 */
 	public static void set() {
 //		Local.username = "user" + (new java.util.Random().nextInt(90) + 10);
 //		Local.hostname = "localhost";

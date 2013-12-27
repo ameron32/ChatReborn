@@ -6,22 +6,10 @@
     android:background="@drawable/bg_striped" >
 
     <LinearLayout
-        android:id="@+id/llChatServerHolder"
-        android:layout_width="0px"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="#FFFFFF"
-        android:minWidth="0px"
-        android:orientation="vertical" >
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/llChatClientHolder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/llChatServerHolder"
         android:background="#FFFFFF"
         android:orientation="vertical" >
     </LinearLayout>

@@ -1,21 +1,28 @@
 package com.ameron32.knbasic.core.chat;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +42,7 @@ import com.ameron32.chatreborn.chat.Network.SystemMessage;
 import com.ameron32.chatreborn.chat.Network.UpdateNames;
 import com.ameron32.chatreborn.fragments.ChatClientFragment;
 import com.ameron32.chatreborn.fragments.ChatServerFragment;
-import com.ameron32.chatreborn.helpers.SendText;
+import com.ameron32.chatreborn.helpers.SendBar;
 import com.ameron32.chatreborn.services.ChatClient;
 import com.ameron32.chatreborn.services.ChatServer;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
@@ -105,9 +112,6 @@ public class MasterActivity
 	}
 	
 	protected void chatConnect() {
-		if (fm == null)
-			fm = getSupportFragmentManager();
-		
 		promptClient();
 //		startServer();
 //		startClient(host);
@@ -133,10 +137,15 @@ public class MasterActivity
 		messageBarInit();
 		slidingLayerInit();
 		universalImageLoaderInit();
-		kryonetInit();
+		kryonetInit(savedInstanceState);
 
 		// Load memory
 		Loader.run(this);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
 	}
 	
 	@Override
@@ -172,12 +181,16 @@ public class MasterActivity
 		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
 		CustomSlidingLayer.closeAllSlidingLayers();
 		
+		kryonetOnPause();
+		
 		super.onPause();
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		kryonetOnResume();
 		
 		// reopen sliders closed when onPause
 		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
@@ -203,7 +216,7 @@ public class MasterActivity
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -337,14 +350,20 @@ public class MasterActivity
 		super.onSaveInstanceState(outState);
 		if (mMessageBar != null)
 			outState.putBundle("mMessageBar", mMessageBar.onSaveInstanceState());
+		
+		boolean[] serverANDclientState = new boolean[] { getIsServerRunning(), getIsClientRunning()};
+		outState.putBooleanArray("serverANDclientState", serverANDclientState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle inState) {
 		super.onRestoreInstanceState(inState);
 		if (inState.containsKey("mMessageBar"))
-			mMessageBar
-					.onRestoreInstanceState(inState.getBundle("mMessageBar"));
+			mMessageBar.onRestoreInstanceState(inState.getBundle("mMessageBar"));
+		
+		boolean[] serverANDclientState = inState.getBooleanArray("serverANDclientState");
+		sFragmentOn = serverANDclientState[0];
+		cFragmentOn = serverANDclientState[1];
 	}
 	
 	// ------------------------------------------------------------------------------------------------
@@ -368,21 +387,33 @@ public class MasterActivity
 		return isClientRunning;
 	}
 	
-	protected void promptClient() {
+	private void promptClient() {
 		final AutoCompleteTextView etHost = new AutoCompleteTextView(MasterActivity.this);
 		etHost.setHint("Ex: \"192.168.254.254\" or \"localhost\"");
+		final String[] values = { "localhost", "192.168.1.26", "192.168.1.13", "192.168.24.192" };
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, values);
+		etHost.setThreshold(256);
+		etHost.setAdapter(adapter);
+		etHost.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					etHost.showDropDown();
+				}
+			}
+		});
 		
 		final AlertDialog connection = new AlertDialog.Builder(MasterActivity.this)
-		.setTitle("Host IP")
-		.setPositiveButton("Connect", new Dialog.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-				startConnect(etHost);
-			}
-		})
-		.setView(etHost)
-		.create();
+		  .setTitle("Host IP")
+		  .setPositiveButton("Connect", new Dialog.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					startConnect(etHost);
+				}
+			})
+		  .setView(etHost)
+		  .create();
 
 		etHost.setOnKeyListener(new EditText.OnKeyListener() {
 			@Override
@@ -396,7 +427,6 @@ public class MasterActivity
 				}
 				return false;
 			}
-
 		});
 		
 		connection.show();
@@ -411,20 +441,80 @@ public class MasterActivity
 		startClient(hostIP);
 	}
 	
-	private void kryonetInit() {
-
+	private void kryonetInit(Bundle savedInstanceState) {
+		if (fm == null)
+			fm = getSupportFragmentManager();
+	}
+	
+	private void kryonetOnResume() {
+		startServerFragment();
+		startClientFragment();
+	}
+	
+	private void kryonetOnPause() {
+		stopServerFragment();
+		stopClientFragment();
+	}
+	
+	private boolean sFragmentOn = false;
+	private boolean cFragmentOn = false;
+	private void startServerFragment() {
+//		if (!sFragmentOn) {
+		
+//		sFragment = (ChatServerFragment) getSupportFragmentManager().findFragmentByTag("sFragment");
+//		
+//		if (sFragment == null) {
+			FragmentTransaction ftServer = fm.beginTransaction();
+			sFragment = new ChatServerFragment();
+//			sFragment.setArguments(getIntent().getExtras());
+			ftServer.replace(R.id.llChatServerHolder, sFragment, "sFragment");
+			ftServer.commit();
+//		}   
+		
+//		}
+	}
+	
+	private void stopServerFragment() {
+//		if (sFragmentOn) {
+			FragmentTransaction ftServer = fm.beginTransaction();
+			ftServer.remove(sFragment);
+			ftServer.commit();
+//		}
+	}
+	
+	private void startClientFragment() {
+//		if (!cFragmentOn) {
+		
+//		cFragment = (ChatClientFragment) getSupportFragmentManager().findFragmentByTag("cFragment");
+//		
+//		if (cFragment == null) {
+			FragmentTransaction ftClient = fm.beginTransaction();
+			cFragment = new ChatClientFragment();
+//			cFragment.setArguments(getIntent().getExtras());
+			// replace?
+			ftClient.replace(R.id.llChatClientHolder, cFragment, "cFragment");
+			ftClient.commit();
+//        }
+		
+//		}
+	}
+	
+	private void stopClientFragment() {
+//		if (cFragmentOn) {
+			FragmentTransaction ftClient = fm.beginTransaction();
+			ftClient.remove(cFragment);
+			ftClient.commit();
+//		}
 	}
 	
 	private void startServer() {
 		if (!isServerRunning) {
-			FragmentTransaction ftServer = fm.beginTransaction();
-			sFragment = new ChatServerFragment();
-			ftServer.add(R.id.llChatServerHolder, sFragment);
-			ftServer.commit();
-
+			startServerFragment();
+			sFragmentOn = true;
+			
 			cSs = new Intent(MasterActivity.this, ChatServer.class);
 			startService(cSs);
-			
+
 			isServerRunning = !isServerRunning;
 		}
 	}
@@ -433,9 +523,8 @@ public class MasterActivity
 		if (isServerRunning) {
 			stopService(cSs);
 
-			FragmentTransaction ftServer = fm.beginTransaction();
-			ftServer.remove(sFragment);
-			ftServer.commit();
+			stopServerFragment();
+			sFragmentOn = false;
 			
 			isServerRunning = !isServerRunning;
 		}
@@ -444,10 +533,8 @@ public class MasterActivity
 	private void startClient(final String host) {
 		if (!isClientRunning) {
 			// startClient
-			FragmentTransaction ftClient = fm.beginTransaction();
-			cFragment = new ChatClientFragment();
-			ftClient.add(R.id.llChatClientHolder, cFragment);
-			ftClient.commit();
+			startClientFragment();
+			cFragmentOn = true;
 
 			cCs = new Intent(MasterActivity.this, ChatClient.class);
 			cCs.putExtra("host", host);
@@ -459,13 +546,36 @@ public class MasterActivity
 		}
 	}
 	
-	InternalNotification iNotify;
+	private void stopClient() {
+		if (isClientRunning) {
+			termClient();
+			
+			stopService(cCs);
+
+			stopClientFragment();
+			cFragmentOn = false;
+			
+			isClientRunning = !isClientRunning;
+		}
+	}
+	
+	private void termClient() {
+		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
+		stSendBar.setConnected(false);
+		stSendBar.setSendListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+	}
+	
+	private InternalNotification iNotify;
 	private void initClient() {
 		// initSendBar
 		// --------------------------------------------------------------
-		final SendText stSendBar = (SendText) findViewById(R.id.stSendBar);
+		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
 		stSendBar.setConnected(true);
-		stSendBar.setHint("Message");
 		stSendBar.setSendListener(new Runnable() {
 			@Override
 			public void run() {
@@ -480,57 +590,33 @@ public class MasterActivity
 		// initNotificationFader
 		// --------------------------------------------------------------
 		iNotify = (InternalNotification) findViewById(R.id.iNotify);
-
-		ChatListener chatClientListener = new ChatListener() {
 		
+		
+		// requires slidingLayerInit()
+		mChatSlidingLayer.setOnOpenRunnable(new Runnable() {
 			@Override
-			protected void received(
-					ChatConnection chatConnection,
-					ServerChatHistory serverChatHistory) {
-				// TODO Auto-generated method stub
-				
+			public void run() {
+				iNotify.setDisabled(true);
 			}
-			
+		});
+		mChatSlidingLayer.setOnCloseRunnable(new Runnable() {
 			@Override
-			protected void received(
-					ChatConnection chatConnection,
-					MessageClass messageClass) {
-				// TODO Auto-generated method stub
-				
+			public void run() {
+				iNotify.setDisabled(false);
 			}
-			
+		});
+		// ---------------------------
+		
+		
+		ChatListener chatClientListener = new ChatListener() {
 			@Override
-			protected void received(
-					ChatConnection chatConnection,
-					SystemMessage systemMessage) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			protected void received(
-					final ChatConnection chatConnection,
-					final ChatMessage chatMessage) {
+			protected void received(final ChatMessage chatMessage, final ChatConnection chatConnection) {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						iNotify.show(chatMessage.name + ": " + chatMessage.getText(), 3000);
 					}
 				});
-			}
-			
-			@Override
-			protected void received(ChatConnection chatConnection,
-					UpdateNames updateNames) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			protected void received(ChatConnection chatConnection,
-					RegisterName registerName) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
@@ -545,32 +631,6 @@ public class MasterActivity
 		};
 
 		cFragment.addChatClientListener(chatClientListener);
-	}
-	
-	private void stopClient() {
-		if (isClientRunning) {
-			termClient();
-			
-			stopService(cCs);
-
-			FragmentTransaction ftClient = fm.beginTransaction();
-			ftClient.remove(cFragment);
-			ftClient.commit();
-			
-			isClientRunning = !isClientRunning;
-		}
-	}
-	
-	private void termClient() {
-		SendText stSendBar = (SendText) findViewById(R.id.stSendBar);
-		stSendBar.setConnected(false);
-		stSendBar.setHint("offline");
-		stSendBar.setSendListener(new Runnable() {
-			@Override
-			public void run() {
-				showMessage("Client Not Connected", true);
-			}
-		});
 	}
 	
 

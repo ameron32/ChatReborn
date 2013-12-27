@@ -49,7 +49,7 @@ public class ChatServerFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setRetainInstance(true);
+		setRetainInstance(true);	
 	}
 	
 	private Intent chatServerService;
@@ -65,7 +65,6 @@ public class ChatServerFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-
 	}
 	
 	@Override
@@ -73,8 +72,27 @@ public class ChatServerFragment extends Fragment {
 		super.onResume();
 		getActivity().bindService(getCSS(), mConnection, ContextWrapper.BIND_AUTO_CREATE);
 		chatServerListener2.setDisabled(false);
-		chatFrame = new ChatServerFrame(getActivity(), v);
-		initChatServerFrame();
+		if (chatFrame == null) chatFrame = new ChatServerFrame(getActivity(), v);
+		
+//		initChatServerFrame();
+	}
+	
+	private void initiateServerStart() {
+		startServer = new Runnable() {
+			@Override
+			public void run() {
+				NetworkTask task = new NetworkTask(
+						Task.StartServer, 
+						chatServer, 
+						chatFrame);
+				task.execute();
+			}
+		};
+		startServer.run();
+	}
+	
+	private void initiateServerStop() {
+		// nothing yet
 	}
 	
 	@Override
@@ -82,31 +100,23 @@ public class ChatServerFragment extends Fragment {
 		super.onPause();
 		getActivity().unbindService(mConnection);
 		chatServerListener2.setDisabled(true);
-		chatFrame = null;
+//		chatFrame = null;
 	}
 	
 	@Override
 	public void onStop() {
 		super.onStop();
 	}
+
+	private Runnable startServer;
 	
 	private void initChatServerFrame() {
-		chatFrame.setHostAServerListener(new Runnable() {
-			@Override
-			public void run() {
-				NetworkTask task = new NetworkTask(
-						Task.StartServer, 
-						chatServer.getServer(), 
-						chatFrame);
-				task.execute();
-			}
-		});
+		
 	}
 	
 	private MyServiceConnection mConnection = new MyServiceConnection();
 	private boolean isBound_mConnection = false;
 	public class MyServiceConnection implements ServiceConnection {
-
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			MyServerBinder mBinder = (MyServerBinder) service;
@@ -114,7 +124,11 @@ public class ChatServerFragment extends Fragment {
 			if (chatServer != null) {
 				isBound_mConnection = true;
 				chatServer.isBound = true;
-				chatServer.getServer().addListener(chatServerListener2);
+				
+				if (chatServer.getIsPrepared() && !chatServer.getIsRunning()) {
+					chatServer.getServer().addListener(chatServerListener2);
+					initiateServerStart();
+				}
 			} else {
 				Toast.makeText(getActivity(), "chatServer is Null", Toast.LENGTH_SHORT).show();
 			}
@@ -123,121 +137,40 @@ public class ChatServerFragment extends Fragment {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			if (chatServer != null) {
+				if (chatServer.getIsRunning()) {
+					initiateServerStop();
+					chatServer.getServer().removeListener(chatServerListener2);
+				}
+
 				isBound_mConnection = false;
 				chatServer.isBound = false;
-				chatServer.getServer().removeListener(chatServerListener2);
 			} else {
 				Toast.makeText(getActivity(), "chatServer is Null", Toast.LENGTH_SHORT).show();
 			}
 		}
-		
 	}
 	
-//	final Listener chatServerListener = new Listener() {
-//		public void received(Connection connection, Object object) {
-//			if (object instanceof RegisterName) {
-//				Global.Server.connectedUsers.add(((RegisterName) object).name);
-//				updateChatFrame(object, FrameProcess.ResetNames);
-//				return;
-//			}
-//
-//			if (object instanceof ChatMessage) {
-//				final ChatMessage chatMessage = (ChatMessage) object;
-////				Global.Local.clientChatHistory.put(chatMessage.getTimeStamp(), chatMessage);
-//				updateChatFrame(object, FrameProcess.AddMessage);
-//				return;
-//			}
-//			
-//			if (object instanceof SystemMessage) {
-//				final SystemMessage sysMessage = (SystemMessage) object;
-//				// TODO what does a system message do?
-//				updateChatFrame(object, FrameProcess.AddMessage);
-//				return;
-//			}
-//			
-//			if (!(object instanceof FrameworkMessage)) {
-//				final SystemMessage unexpected = new SystemMessage();
-//				unexpected.name = "System";
-//				unexpected.setText("unexpected object: " + object.toString());
-//				updateChatFrame(unexpected, FrameProcess.AddMessage);
-//			}
-//		}
-//
-//		public void disconnected(Connection connection) {
-//			Global.Server.removeUser(((ChatConnection) connection).name);
-//			updateChatFrame(null, FrameProcess.ResetNames);
-//		}
-//	};
-	
 	final ChatListener chatServerListener2 = new ChatListener() {
-		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				ServerChatHistory serverChatHistory) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				MessageClass messageClass) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				SystemMessage systemMessage) {
+		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			chatFrame.addMessage(systemMessage);
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				ChatMessage chatMessage) {
+		protected void received(final ChatMessage chatMessage, final ChatConnection chatConnection) {
 			chatFrame.addMessage(chatMessage);
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				UpdateNames updateNames) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				RegisterName registerName) {
+		protected void received(final RegisterName registerName, final ChatConnection chatConnection) {
 			Global.Server.connectedUsers.add(registerName.name);
 			chatFrame.resetNames();
 		}
 		
 		@Override
-		protected void disconnected(ChatConnection chatConnection) {
+		protected void disconnected(final ChatConnection chatConnection) {
 
 		}
-	
 	};
 	
-//	private void updateChatFrame(Object object, FrameProcess process) {
-//		if (chatFrame != null && getActivity() != null) {
-//			switch (process) {
-//			case ResetNames:
-//				if (object != null) {
-//					final RegisterName registerName = (RegisterName) object;
-//				}
-////				Global.Local.groupUsers = updateNames.names;
-//				chatFrame.resetNames();
-//				break;
-//			case AddMessage:
-//				final MessageClass chatMessage = (MessageClass) object;
-//				Global.Server.serverChatHistory.put(chatMessage.getTimeStamp(), chatMessage);
-//				chatFrame.addMessage(chatMessage);
-//				break;
-//			}
-//		}
-//	}
-//	
-//	private enum FrameProcess {
-//		ResetNames, AddMessage
-//	}
 }

@@ -4,10 +4,19 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 
 	public static final int NULL_ID = -1;
+	private Runnable onOpenRunnable = null;
+	public void setOnOpenRunnable(final Runnable r) {
+		onOpenRunnable = r;
+	}
+	private Runnable onCloseRunnable = null;
+	public void setOnCloseRunnable(final Runnable r) {
+		onCloseRunnable = r;
+	}
 	
 	// Registry of all CustomSlidingLayers
 	private static final ArrayList<CustomSlidingLayer> customSlidingLayers 
@@ -31,6 +40,10 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 	}
 	
 	private boolean isSlidingLayerOpen = false;
+	private boolean isTouchEnabled = false;
+	public void setTouchEnabled(boolean state) {
+		isTouchEnabled = state;
+	}
 	
 	public void register() {
 		customSlidingLayers.add(this);
@@ -70,8 +83,12 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 	private void slidingLayerToggle() {
 		if (isSlidingLayerOpen) {
 			closeLayer(true);
+			if (onCloseRunnable != null)
+				onCloseRunnable.run();
 		} else {
 			openLayer(true);
+			if (onOpenRunnable != null)
+				onOpenRunnable.run();
 		}
 		isSlidingLayerOpen = !isSlidingLayerOpen;
 	}
@@ -108,4 +125,15 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 		// TODO
 	}
 
+	@Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+		if (!isTouchEnabled) return false;
+		return super.onInterceptTouchEvent(ev);
+	}
+	
+	@Override
+    public boolean onTouchEvent(MotionEvent ev) {
+		if (!isTouchEnabled) return false;
+		return super.onTouchEvent(ev);
+	}
 }

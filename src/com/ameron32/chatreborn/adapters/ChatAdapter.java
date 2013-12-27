@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import com.ameron32.chatreborn.chat.Network.ChatMessage;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
 import com.ameron32.chatreborn.chat.Network.SystemMessage;
+import com.ameron32.knbasic.core.chat.MainActivity;
 import com.ameron32.knbasic.core.chat.R;
 
 import android.annotation.SuppressLint;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -59,43 +61,54 @@ public class ChatAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-    	MessageClass item = getItem(position);
-    	if (item instanceof SystemMessage) {
-//    		if (convertView == null) {
-                LayoutInflater inflater = 
-                		(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.chat_sysmsg_ui, 
-                        parent, false);
-                holder = new ViewHolder(); 
-                holder.tvTime = (TextView) convertView.findViewById(R.id.tvTimeStamp); 
-                holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr); 
-                holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg); 
+    public View getView(final int position, View convertView, final ViewGroup parent) {
+    	final MessageClass item = getItem(position);
+		if (item instanceof SystemMessage) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = inflater.inflate(R.layout.chat_sysmsg_ui, parent,
+					false);
+			holder = new ViewHolder();
+			holder.tvTime = (TextView) convertView
+					.findViewById(R.id.tvTimeStamp);
+			holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr);
+			holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
 
-                convertView.setTag(holder); 
-//            } else { 
-//                holder = (ViewHolder) convertView.getTag(); 
-//            }
-    	}
-    	if (item instanceof ChatMessage) {
-//        	if (convertView == null) {
-                LayoutInflater inflater = 
-                		(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.chat_bubble_ui, 
-                        parent, false);
-                holder = new ViewHolder(); 
-                holder.tvTime = (TextView) convertView.findViewById(R.id.tvTimeStamp); 
-                holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr); 
-                holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg); 
+			convertView.setTag(holder);
+		}
+		if (item instanceof ChatMessage) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = inflater.inflate(R.layout.chat_bubble_ui, parent,
+					false);
+			holder = new ViewHolder();
+			holder.tvTime = (TextView) convertView
+					.findViewById(R.id.tvTimeStamp);
+			holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr);
+			holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
 
-                convertView.setTag(holder); 
-//            } else { 
-//                holder = (ViewHolder) convertView.getTag(); 
-//            }
-    	}
-    		
-    		
-    		
+			convertView.setTag(holder);
+		}
+		
+		// both share slide rear
+		holder.bEdit = (Button) convertView.findViewById(R.id.bEditChat);
+		holder.bHide = (Button) convertView.findViewById(R.id.bHideChat);
+		holder.bDelete = (Button) convertView.findViewById(R.id.bDeleteChat);
+		
+		// tmp OnClickListener
+		final View.OnClickListener tmp = new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				MainActivity a = (MainActivity) context;
+				a.showMessage("Not yet implemented.");
+			}
+		};
+    	
+		holder.bEdit.setOnClickListener(tmp);
+		holder.bHide.setOnClickListener(tmp);
+		holder.bDelete.setOnClickListener(tmp);
+
+
 
 		Long timeStamp = item.getTimeStamp();
 		holder.tvTime.setText(new SimpleDateFormat("h:mma", Locale.US)
@@ -108,12 +121,13 @@ public class ChatAdapter extends BaseAdapter {
     
     public static class ViewHolder {
         TextView tvTime, tvUsr, tvMsg;
+        Button bEdit, bHide, bDelete;
     }
 
-	@Override
-	public void notifyDataSetChanged() {
-		super.notifyDataSetChanged();
-	}
+//	@Override
+//	public void notifyDataSetChanged() {
+//		super.notifyDataSetChanged();
+//	}
 	
 	public void clear() {
 		mData.clear();
@@ -121,6 +135,10 @@ public class ChatAdapter extends BaseAdapter {
 	
 	public void addAll(TreeMap<Long, MessageClass> history) {
 		mData.putAll(history);
+	}
+	
+	public void remove(int position) {
+		mData.remove(getKeyAt(position));
 	}
 	
 } 

@@ -35,39 +35,18 @@ public class ChatServer extends ChatService {
 				return new ChatConnection();
 			}
 		});
-
+		
 		Network.register(server);
 
 		getServer().addListener(serverListener);
 		
+
 		// restore chat log somehow 
 	}
 	
 	private final ChatListener serverListener = new ChatListener() {
-		
 		@Override
-		protected void connected() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				ServerChatHistory serverChatHistory) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				MessageClass messageClass) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				SystemMessage systemMessage) {
+		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			String message = null;
 			SystemMessage sourceSMessage = systemMessage;
 			message = sourceSMessage.getText();
@@ -96,8 +75,7 @@ public class ChatServer extends ChatService {
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				ChatMessage chatMessage) {
+		protected void received(final ChatMessage chatMessage, final ChatConnection chatConnection) {
 			String message = null;
 			message = chatMessage.getText();
 			if (message == null)
@@ -114,15 +92,7 @@ public class ChatServer extends ChatService {
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				UpdateNames updateNames) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				RegisterName registerName) {
+		protected void received(final RegisterName registerName, final ChatConnection chatConnection) {
 			// confirm connection is clear
 			if (chatConnection.name != null)
 				return;
@@ -137,7 +107,7 @@ public class ChatServer extends ChatService {
 			chatConnection.name = name;
 
 			// create a new server notification
-			final ChatMessage sysMessage = new ChatMessage();
+			final SystemMessage sysMessage = new SystemMessage();
 			sysMessage.name = serverName;
 			sysMessage.setText(name + " connected.");
 
@@ -147,25 +117,22 @@ public class ChatServer extends ChatService {
 		}
 		
 		@Override
-		protected void disconnected(ChatConnection chatConnection) {
+		protected void disconnected(final ChatConnection chatConnection) {
 			if (chatConnection.name != null) {
 				// Announce to everyone that someone
 				// (with a registered name) has left.
 				final SystemMessage sysMessage = new SystemMessage();
 				sysMessage.name = "Server:[" + Utils.getIPAddress(true)
 						+ ":" + Network.port + "]";
-				sysMessage.setText(chatConnection.name + " connected.");
+				sysMessage.setText(chatConnection.name + " disconnected.");
 				getServer().sendToAllTCP(sysMessage);
 				
 				updateNames();
 			}
 		}
-
 	};
 	
 	private void updateNames() {
-		Log.error("updateNames called");
-		
 		// Collect the names for each connection.
 		final Connection[] connections = getServer().getConnections();
 		final ArrayList<String> names = new ArrayList<String>(
@@ -199,7 +166,17 @@ public class ChatServer extends ChatService {
 	// SERVICE Calls
 	// --------------------------------------
 
+	private boolean isPrepared = false;
+	public boolean getIsPrepared() {
+		return isPrepared;
+	}
 	private boolean isRunning = false;
+	public boolean getIsRunning() {
+		return isRunning;
+	}
+	public void setIsRunning(boolean state) {
+		isRunning = state;
+	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -210,52 +187,59 @@ public class ChatServer extends ChatService {
 	}
 
 	private void startServer() {
-		if (!isRunning) {
+		if (!getIsPrepared()) {
 			init();
-			isRunning = true;
+			isPrepared = true;
 		}
 	}
-
+	
 	@Override
 	public void onDestroy() {
-		stopServerIn(50000);
+		stopServerIn(10000);
 		super.onDestroy();
 	}
 
 	private void stopServerIn(int millis) {
-		if (isRunning) {
+		if (getIsPrepared()) {
 			term(millis);
-			isRunning = false;
+			isPrepared = false;
 		}
 	}
 	
 	private void term(int millis) {
-		AsyncTask<Integer, Integer, String> stopServer 
-			= new AsyncTask<Integer, Integer, String>() {
-		@Override
-		protected String doInBackground(Integer... params) {
-			
-			int totalTimeInMillis = params[0];
-			int updates = 10;
-			int timePerUpdate = totalTimeInMillis / updates;
-			for (int u = 0; u < updates; u++) {
-				sendChatMessage("Server shutting down in " 
-						+ ((totalTimeInMillis - (timePerUpdate * u)) / 1000) + " seconds!");
-				try {
-					Thread.sleep(timePerUpdate);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		AsyncTask<Integer, Integer, String> stopServer = new AsyncTask<Integer, Integer, String>() {
+			@Override
+			protected String doInBackground(Integer... params) {
+				int totalTimeInMillis = params[0];
+				int updates = 10;
+				int timePerUpdate = totalTimeInMillis / updates;
+				for (int u = 0; u < updates; u++) {
+					sendChatMessage("Server shutting down in "
+							+ ((totalTimeInMillis - (timePerUpdate * u)) / 1000)
+							+ " seconds!");
+					try {
+						Thread.sleep(timePerUpdate);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
+
+				// store server log somehow
+
+				getServer().stop();
+				getServer().close();
+				
+				setIsRunning(false);
+				return null;
 			}
 
-			// store server log somehow
-			
-			getServer().stop();
-			getServer().close();
-			return null;
-		}
-	};
-	stopServer.execute(millis);
+			@Override
+			protected void onPostExecute(String result) {
+				clearNotification(getSTOP_NOTIFICATION_ID());
+				super.onPostExecute(result);
+			}
+		};
+		stopServer.execute(millis);
 	}
 
 	// --------------------------------------
@@ -267,7 +251,7 @@ public class ChatServer extends ChatService {
 		return mBinder;
 	}
 
-	IBinder mBinder = new MyServerBinder();
+	private IBinder mBinder = new MyServerBinder();
 
 	@Override
 	public void onCreate() {

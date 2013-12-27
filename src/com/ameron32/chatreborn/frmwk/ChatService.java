@@ -14,25 +14,11 @@ import android.support.v4.app.NotificationCompat;
 
 public class ChatService extends Service {
 
-	private int START_NOTIFICATION_ID, STOP_NOTIFICATION_ID;
+	private int START_NOTIFICATION_ID;
+	private int STOP_NOTIFICATION_ID;
 	public boolean isBound = false;
+	private NotificationManager nManager;
 	
-	public int getSTOP_NOTIFICATION_ID() {
-		return STOP_NOTIFICATION_ID;
-	}
-
-	protected void setSTOP_NOTIFICATION_ID(int id) {
-		STOP_NOTIFICATION_ID = id;
-	}
-
-	public int getSTART_NOTIFICATION_ID() {
-		return START_NOTIFICATION_ID;
-	}
-
-	protected void setSTART_NOTIFICATION_ID(int id) {
-		START_NOTIFICATION_ID = id;
-	}
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		isBound = true;
@@ -63,6 +49,12 @@ public class ChatService extends Service {
 
 	private final Context context = this;
 
+	private NotificationManager init(NotificationManager nManager) {
+		if (nManager == null) 
+			return (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		return nManager;
+	}
+	
 	private void startNotification(int id) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
 				context).setSmallIcon(R.drawable.like)
@@ -73,9 +65,10 @@ public class ChatService extends Service {
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(contentIntent);
-		NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nManager = init(nManager);
 		nManager.notify(getSTART_NOTIFICATION_ID(), builder.build());
-		nManager.cancel(getSTOP_NOTIFICATION_ID());
+
+		clearNotification(getSTOP_NOTIFICATION_ID());
 	}
 
 	private void stopNotification(int id) {
@@ -88,12 +81,13 @@ public class ChatService extends Service {
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(contentIntent);
-		NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		init(nManager);
 		nManager.notify(getSTOP_NOTIFICATION_ID(), builder.build());
-		nManager.cancel(getSTART_NOTIFICATION_ID());
+
+		clearNotification(getSTART_NOTIFICATION_ID());
+		
 	}
 
-	//
 	private String getSimpleName() {
 		return getClass().getSimpleName();
 	}
@@ -115,8 +109,13 @@ public class ChatService extends Service {
 	}
 	
 	private static final int MESSAGE_NOTIFICATIONS = 99;
-	public void notifyMessage(String msg) {
+	protected void notifyMessage(String msg) {
 		createNotification(msg, "Click to OpenApplication", MESSAGE_NOTIFICATIONS);
+	}
+	
+	protected void clearNotification(int id) {
+		init(nManager);
+		nManager.cancel(id);
 	}
 	
 	private void createNotification(String title, String text, int id) {
@@ -130,7 +129,27 @@ public class ChatService extends Service {
 		builder.setContentIntent(contentIntent);
 		builder.setAutoCancel(true);
 		
-		NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		init(nManager);
 		nManager.notify(getSTOP_NOTIFICATION_ID(), builder.build());
+	}
+
+	// --------------------------------------
+	// GETTER / SETTER
+	// --------------------------------------
+	
+	protected int getSTART_NOTIFICATION_ID() {
+		return START_NOTIFICATION_ID;
+	}
+
+	protected void setSTART_NOTIFICATION_ID(int sTART_NOTIFICATION_ID) {
+		START_NOTIFICATION_ID = sTART_NOTIFICATION_ID;
+	}
+
+	protected int getSTOP_NOTIFICATION_ID() {
+		return STOP_NOTIFICATION_ID;
+	}
+
+	protected void setSTOP_NOTIFICATION_ID(int sTOP_NOTIFICATION_ID) {
+		STOP_NOTIFICATION_ID = sTOP_NOTIFICATION_ID;
 	}
 }

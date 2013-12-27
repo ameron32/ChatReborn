@@ -30,6 +30,10 @@ public class MainActivity extends MasterActivity {
 	// store the current font sequence, needed for "Cycle Font"
 	private int currentFont = 0;
 
+	public void showMessage(String message) {
+		super.showMessage(message, true);
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,18 +100,7 @@ public class MainActivity extends MasterActivity {
 	protected void onResume() {
 		super.onResume();
 		
-		replaceFragment();
-	}
-	
-	private void replaceFragment() {
-		FragmentTransaction ftStarter = fm.beginTransaction();
-		StarterFragment sf = new StarterFragment();
-		
-		// why do i have to have this or it duplicates the ftStarter?
-		ftStarter.replace(R.id.llPrimary, sf);
-		ftStarter.addToBackStack(null);
-		ftStarter.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-		ftStarter.commit();
+		setFragment();
 	}
 	
 	@Override
@@ -119,7 +112,30 @@ public class MainActivity extends MasterActivity {
 	
 	@Override
 	protected void onPause() {
+		unsetFragment();
+		
 		super.onPause();
+	}
+	
+	private StarterFragment sf;
+	private void setFragment() {
+		FragmentTransaction ftStarter = fm.beginTransaction();
+		sf = new StarterFragment();
+		
+		// why do i have to have this or it duplicates the ftStarter?
+		ftStarter.replace(R.id.llPrimary, sf);
+		ftStarter.addToBackStack(null);
+		ftStarter.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+		ftStarter.commit();
+	}	
+	private void unsetFragment() {
+		FragmentTransaction ftStarter = fm.beginTransaction();
+//		StarterFragment sf = new StarterFragment();
+		
+		// why do i have to have this or it duplicates the ftStarter?
+		ftStarter.remove(sf);
+		ftStarter.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+		ftStarter.commit();
 	}
 
 	// ------------------------------------------------------------------------------------------------

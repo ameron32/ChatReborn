@@ -46,20 +46,12 @@ public class ChatClient extends ChatService {
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				ServerChatHistory serverChatHistory) {
+		protected void received(final ServerChatHistory serverChatHistory, final ChatConnection chatConnection) {
 			Global.Local.unpackServerHistory(serverChatHistory.getHistoryBundle());
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				MessageClass messageClass) {
-
-		}
-		
-		@Override
-		protected void received(ChatConnection chatConnection,
-				SystemMessage systemMessage) {
+		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			Global.Local.addToHistory(systemMessage);
 			if (!isBound) {
 				notifyMessage(systemMessage.name + "[" + systemMessage.getText() + "]");
@@ -67,8 +59,7 @@ public class ChatClient extends ChatService {
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				ChatMessage chatMessage) {
+		protected void received(final ChatMessage chatMessage, final ChatConnection chatConnection) {
 			Global.Local.addToHistory(chatMessage);
 			if (!isBound) {
 				notifyMessage(chatMessage.name + " says: " + chatMessage.getText());
@@ -76,43 +67,50 @@ public class ChatClient extends ChatService {
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				UpdateNames updateNames) {
+		protected void received(final UpdateNames updateNames, final ChatConnection chatConnection) {
 			if (!isBound) {
 				notifyMessage("Users Changed");
 			}
 		}
 		
 		@Override
-		protected void received(ChatConnection chatConnection,
-				RegisterName registerName) {
-
-		}
-		
-		@Override
-		protected void disconnected(ChatConnection chatConnection) {
+		protected void disconnected(final ChatConnection chatConnection) {
 			Global.Local.clearChatHistory();
 		}
 	};
 	
 	private boolean isConnected = false;
+	public boolean getIsConnected() {
+		return isConnected;
+	}
+	public void setIsConnected(boolean state) {
+		isConnected = state;
+	}
+	
+	private boolean isPrepared = false;
+	public boolean getIsPrepared() {
+		return isPrepared;
+	}
+	public void setIsPrepared(boolean state) {
+		isPrepared = state;
+	}
 	private void connect(String host) {
-		if (!isConnected) {
+		if (!isPrepared) {
 			Global.Local.hostname = host;
 			client = new Client();
 			init();
 			
-			isConnected = !isConnected;
+			isPrepared = true;
 		}
 	}
 	
 	private void disconnect() {
-		if (isConnected) {
+		if (isPrepared) {
 			client.stop();
 			client.close();
 			client = null;
 			
-			isConnected = !isConnected;
+			isPrepared = false;
 		}
 	}
 	
@@ -120,19 +118,32 @@ public class ChatClient extends ChatService {
 	// SERVICE Calls
 	// --------------------------------------
 	
+	private boolean isStarted = false;
+	public boolean getIsStarted() {
+		return isStarted;
+	}
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		connect(intent.getStringExtra("host"));
+		com.esotericsoftware.minlog.Log
+			.set(com.esotericsoftware.minlog.Log.LEVEL_DEBUG);
+		if (!isStarted) {
+			connect(intent.getStringExtra("host"));
+			isStarted = true;
+		}
 		return super.onStartCommand(intent, flags, startId);
 	}
 	
 	@Override
 	public void onDestroy() {
-		disconnect();
+		if (isStarted) {
+			disconnect();
+			isStarted = false;
+		}
 		super.onDestroy();
+		clearNotification(getSTOP_NOTIFICATION_ID());
 	}
 	
-	IBinder mBinder = new MyClientBinder();
+	private IBinder mBinder = new MyClientBinder();
 
 	@Override
 	public IBinder onBind(Intent intent) {
