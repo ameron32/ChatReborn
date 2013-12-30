@@ -3,9 +3,11 @@ package com.ameron32.chatreborn.ui;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import com.ameron32.knbasic.core.chat.R;
 
+import com.ameron32.knbasic.core.chat.R;
 import com.ameron32.chatreborn.chat.Global;
+import com.ameron32.chatreborn.chat.Network;
+import com.ameron32.chatreborn.chat.Utils;
 import com.ameron32.chatreborn.chat.Network.MessageClass;
 
 import android.app.Activity;
@@ -110,6 +112,11 @@ public class ChatServerFrame {
 	
 	private Activity getActivity() {
 		return ((Activity) context);
+	}
+
+	public void updateUIHosting() {
+		 String hostInfo = Utils.getIPAddress(true) + ":" + Network.port;
+		 setHostText(hostInfo);
 	}
 	
 }

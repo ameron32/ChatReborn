@@ -345,26 +345,27 @@ public class MasterActivity
 		mMessageBar = new MessageBar(layout, true);
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		if (mMessageBar != null)
-			outState.putBundle("mMessageBar", mMessageBar.onSaveInstanceState());
-		
-		boolean[] serverANDclientState = new boolean[] { getIsServerRunning(), getIsClientRunning()};
-		outState.putBooleanArray("serverANDclientState", serverANDclientState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle inState) {
-		super.onRestoreInstanceState(inState);
-		if (inState.containsKey("mMessageBar"))
-			mMessageBar.onRestoreInstanceState(inState.getBundle("mMessageBar"));
-		
-		boolean[] serverANDclientState = inState.getBooleanArray("serverANDclientState");
-		sFragmentOn = serverANDclientState[0];
-		cFragmentOn = serverANDclientState[1];
-	}
+//	@Override
+//	protected void onSaveInstanceState(Bundle outState) {
+//		super.onSaveInstanceState(outState);
+//		if (mMessageBar != null)
+//			outState.putBundle("mMessageBar", mMessageBar.onSaveInstanceState());
+//		
+//		boolean[] serverANDclientState = new boolean[] { getIsServerRunning(), getIsClientRunning()};
+//		outState.putBooleanArray("serverANDclientState", serverANDclientState);
+//	}
+//
+//	@Override
+//	protected void onRestoreInstanceState(Bundle inState) {
+//		super.onRestoreInstanceState(inState);
+//		if (inState.containsKey("mMessageBar"))
+//			mMessageBar.onRestoreInstanceState(inState.getBundle("mMessageBar"));
+//		
+//		boolean[] serverANDclientState = inState.getBooleanArray("serverANDclientState");
+//		sFragmentOn = serverANDclientState[0];
+//		cFragmentOn = serverANDclientState[1];
+//	}
+	//
 	
 	// ------------------------------------------------------------------------------------------------
 	// MY KRYONET IMPLEMENTATION
@@ -444,16 +445,18 @@ public class MasterActivity
 	private void kryonetInit(Bundle savedInstanceState) {
 		if (fm == null)
 			fm = getSupportFragmentManager();
+		
+		initClient();
 	}
 	
 	private void kryonetOnResume() {
-		startServerFragment();
-		startClientFragment();
+//		startServerFragment();
+//		startClientFragment();
 	}
 	
 	private void kryonetOnPause() {
-		stopServerFragment();
-		stopClientFragment();
+//		stopServerFragment();
+//		stopClientFragment();
 	}
 	
 	private boolean sFragmentOn = false;
@@ -461,15 +464,16 @@ public class MasterActivity
 	private void startServerFragment() {
 //		if (!sFragmentOn) {
 		
-//		sFragment = (ChatServerFragment) getSupportFragmentManager().findFragmentByTag("sFragment");
-//		
-//		if (sFragment == null) {
+		sFragment = (ChatServerFragment) getSupportFragmentManager().findFragmentByTag("sFragment");
+		
+		if (sFragment == null) {
 			FragmentTransaction ftServer = fm.beginTransaction();
 			sFragment = new ChatServerFragment();
 //			sFragment.setArguments(getIntent().getExtras());
 			ftServer.replace(R.id.llChatServerHolder, sFragment, "sFragment");
+			ftServer.addToBackStack(null);
 			ftServer.commit();
-//		}   
+		}
 		
 //		}
 	}
@@ -485,16 +489,17 @@ public class MasterActivity
 	private void startClientFragment() {
 //		if (!cFragmentOn) {
 		
-//		cFragment = (ChatClientFragment) getSupportFragmentManager().findFragmentByTag("cFragment");
-//		
-//		if (cFragment == null) {
+		cFragment = (ChatClientFragment) getSupportFragmentManager().findFragmentByTag("cFragment");
+		
+		if (cFragment == null) {
 			FragmentTransaction ftClient = fm.beginTransaction();
 			cFragment = new ChatClientFragment();
 //			cFragment.setArguments(getIntent().getExtras());
 			// replace?
 			ftClient.replace(R.id.llChatClientHolder, cFragment, "cFragment");
+			ftClient.addToBackStack(null);
 			ftClient.commit();
-//        }
+        }
 		
 //		}
 	}
@@ -575,16 +580,20 @@ public class MasterActivity
 		// initSendBar
 		// --------------------------------------------------------------
 		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
-		stSendBar.setConnected(true);
-		stSendBar.setSendListener(new Runnable() {
-			@Override
-			public void run() {
-				final String msg = stSendBar.getText().toString().trim();
-				if (msg != null && msg.length() > 0) {
-					cFragment.sendMessage(msg);
+		boolean connected = false;
+		if (cFragment != null && cFragment.isChatClientConnected()) {
+			connected = true;
+			stSendBar.setSendListener(new Runnable() {
+				@Override
+				public void run() {
+					final String msg = stSendBar.getText().toString().trim();
+					if (msg != null && msg.length() > 0) {
+						cFragment.sendMessage(msg);
+					}
 				}
-			}
-		});
+			});
+		}
+		stSendBar.setConnected(connected);
 
 
 		// initNotificationFader
@@ -610,6 +619,16 @@ public class MasterActivity
 		
 		ChatListener chatClientListener = new ChatListener() {
 			@Override
+			protected void connected() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						initClient();
+					}
+				});
+			}
+			
+			@Override
 			protected void received(final ChatMessage chatMessage, final ChatConnection chatConnection) {
 				runOnUiThread(new Runnable() {
 					@Override
@@ -621,16 +640,17 @@ public class MasterActivity
 			
 			@Override
 			protected void disconnected(final ChatConnection chatConnection) {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						iNotify.show("Exited: " + chatConnection.name, 2000);
-					}
-				});
+//				runOnUiThread(new Runnable() {
+//					@Override
+//					public void run() {
+//						iNotify.show("Exited: " + chatConnection.name, 2000);
+//					}
+//				});
 			}
 		};
 
-		cFragment.addChatClientListener(chatClientListener);
+		if (cFragment != null)
+			cFragment.addChatClientListener(chatClientListener);
 	}
 	
 

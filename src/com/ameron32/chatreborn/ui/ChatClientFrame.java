@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.ameron32.chatreborn.adapters.ChatAdapter;
 import com.ameron32.chatreborn.chat.Global;
+import com.ameron32.chatreborn.chat.Network;
+import com.ameron32.chatreborn.chat.Utils;
 import com.ameron32.knbasic.core.chat.R;
 import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
 import com.fortysevendeg.swipelistview.SwipeListView;
@@ -135,5 +137,13 @@ public class ChatClientFrame {
 
 	private void runOnUiThread(final Runnable listener) {
 		((Activity) context).runOnUiThread(listener);
+	}
+
+	public void updateUIConnected() {
+		 String netInfo = Global.Local.hostname + ":" + Network.port;
+		 if (Global.Local.hostname.equals("localhost")) {
+			 netInfo += "\n" + "Local: " + Utils.getIPAddress(true);
+		 }
+		 setConnectionText(netInfo);
 	}
 }

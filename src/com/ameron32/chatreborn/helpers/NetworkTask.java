@@ -112,16 +112,11 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 			 
 			 break;
 		 case Connect:
-			 String netInfo = Global.Local.hostname + ":" + Network.port;
-			 if (Global.Local.hostname.equals("localhost")) {
-				 netInfo += "\n" + "Local: " + Utils.getIPAddress(true);
-			 }
-			 chatClientFrame.setConnectionText(netInfo);
+			 chatClientFrame.updateUIConnected();
 			 chatClientFrame.clearChatHistory();
 			 return;
 		 case StartServer:
-			 String hostInfo = Utils.getIPAddress(true) + ":" + Network.port;
-			 chatServerFrame.setHostText(hostInfo);
+			 chatServerFrame.updateUIHosting();
 			 chatServerFrame.clearChatHistory();
 			 return;
 		case SendHistory:

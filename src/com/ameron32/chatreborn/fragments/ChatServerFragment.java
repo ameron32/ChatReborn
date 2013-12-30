@@ -74,7 +74,7 @@ public class ChatServerFragment extends Fragment {
 		chatServerListener2.setDisabled(false);
 		if (chatFrame == null) chatFrame = new ChatServerFrame(getActivity(), v);
 		
-//		initChatServerFrame();
+		initChatServerFrame();
 	}
 	
 	private void initiateServerStart() {
@@ -111,7 +111,8 @@ public class ChatServerFragment extends Fragment {
 	private Runnable startServer;
 	
 	private void initChatServerFrame() {
-		
+		if (chatServer != null && chatServer.getIsRunning())
+			chatFrame.updateUIHosting();
 	}
 	
 	private MyServiceConnection mConnection = new MyServiceConnection();

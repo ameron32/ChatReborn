@@ -67,7 +67,14 @@ public class ChatClientFragment extends Fragment {
 	}
 	
 	private void initChatClientFrame() {
-
+		if (chatClient != null && chatClient.getIsConnected())
+			chatFrame.updateUIConnected();
+	}
+	
+	public boolean isChatClientConnected() {
+		if (chatClient != null)
+			return chatClient.getIsConnected();
+		return false;
 	}
 	
 	@Override
@@ -79,7 +86,7 @@ public class ChatClientFragment extends Fragment {
 		if (chatFrame == null) 
 			chatFrame = new ChatClientFrame(getActivity(), getView());
 
-//		initChatClientFrame();
+		initChatClientFrame();
 	}
 	
 	@Override
