@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,12 +35,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.ameron32.chatreborn.chat.ChatListener;
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.Global;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.fragments.ChatClientFragment;
 import com.ameron32.chatreborn.fragments.ChatServerFragment;
 import com.ameron32.chatreborn.helpers.SendBar;
@@ -75,13 +72,19 @@ public class MasterActivity
 
 	protected void requestExit() {
 		final AlertDialog.Builder d = new AlertDialog.Builder(this);
-		d.setMessage("Close the application?");
+		d.setMessage("Stay Connected?");
 
 		final DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 				case DialogInterface.BUTTON_POSITIVE:
+					stopServer();
+					stopClient();
+					
+					finish();
+					break;
+				case DialogInterface.BUTTON_NEUTRAL:
 					finish();
 					break;
 				case DialogInterface.BUTTON_NEGATIVE:
@@ -92,7 +95,8 @@ public class MasterActivity
 			}
 		};
 
-		d.setPositiveButton("Exit", l);
+		d.setPositiveButton("No", l);
+		d.setNeutralButton("Yes", l);
 		d.setNegativeButton("Cancel", l);
 		d.create();
 		d.show();
@@ -101,8 +105,13 @@ public class MasterActivity
 	protected void addMenuButton(String title, int buttonId, View.OnClickListener listener) {
 		final int master_key = 978979798;
 					
-		// Create and attach button to top of settings drawer
 		LinearLayout llSettings = (LinearLayout) findViewById(R.id.llCustomMenu);
+		for (int i = 0; i < llSettings.getChildCount(); i++) {
+			Button b = (Button) llSettings.getChildAt(i);
+			if ((Integer)b.getTag(master_key) == buttonId) return;
+		}
+			
+		// Create and attach button to top of settings drawer
 		Button customButton = ((Button) (LayoutInflater.from(this).inflate(R.layout.settings_button, null)));
 			customButton.setText(title);
 			customButton.setTag(master_key, buttonId);
@@ -130,14 +139,18 @@ public class MasterActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_master);
+		Log.d("MasterActivity", "onCreate");
+	
 
-		// Initializations by Library Name, 
+		// Initializations by Library Name,
 		// see respective areas below for methods
-		actionbarSherlockInit();
-		messageBarInit();
-		slidingLayerInit();
-		universalImageLoaderInit();
+		actionbarSherlockInit(savedInstanceState);
+		messageBarInit(savedInstanceState);
+		slidingLayerInit(savedInstanceState);
+		universalImageLoaderInit(savedInstanceState);
 		kryonetInit(savedInstanceState);
+		
+//		slidingLayerOnCreate();
 
 		// Load memory
 		Loader.run(this);
@@ -145,6 +158,14 @@ public class MasterActivity
 	
 	@Override
 	protected void onDestroy() {
+		Log.d("MasterActivity", "onDestroy");
+		
+		if (isFinishing()) {
+			// activity close stuff
+		}
+//		slidingLayerOnDestroy();
+		universalImageLoaderTerm();
+		
 		super.onDestroy();
 	}
 	
@@ -177,10 +198,9 @@ public class MasterActivity
 	int openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.NULL_ID;
 	@Override
 	protected void onPause() {
-		// remember and close sliders for reopening in onResume
-		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
-		CustomSlidingLayer.closeAllSlidingLayers();
+		Log.d("MasterActivity", "onPause");
 		
+		slidingLayerOnPause();
 		kryonetOnPause();
 		
 		super.onPause();
@@ -188,14 +208,38 @@ public class MasterActivity
 	
 	@Override
 	protected void onResume() {
+		Log.d("MasterActivity", "onResume");
 		super.onResume();
 		
 		kryonetOnResume();
+		slidingLayerOnResume();
+	}
+	
+	@Override
+	protected void onPostResume() {
+		super.onPostResume();
 		
-		// reopen sliders closed when onPause
-		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
-			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
-		}
+		slidingLayerOnPostResume();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		Log.d("MasterActivity", "onSaveInstanceState");
+		super.onSaveInstanceState(outState);
+
+		messageBarOnSaveInstanceState(outState);
+		slidingLayerOnSaveInstanceState(outState);
+		kryonetOnSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle inState) {
+		Log.d("MasterActivity", "onRestoreInstanceState");
+		super.onRestoreInstanceState(inState);
+
+		messageBarOnRestoreInstanceState(inState);
+		slidingLayerOnRestoreInstanceState(inState);
+		kryonetOnRestoreInstanceState(inState);
 	}
 
 	@Override
@@ -253,7 +297,7 @@ public class MasterActivity
 		return customTitle;
 	}
 	
-	private void actionbarSherlockInit() {
+	private void actionbarSherlockInit(Bundle inState) {
 		// turn app icon into "up" button
 		ActionBar mActionBar = getSupportActionBar();
 		mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -282,6 +326,7 @@ public class MasterActivity
 			getSupportActionBar().setSplitBackgroundDrawable(bgSplit);
 		}
 	}
+	
 
 	// ------------------------------------------------------------------------------------------------
 	// MY MESSAGEBAR IMPLEMENTATION
@@ -293,21 +338,36 @@ public class MasterActivity
 		return mMessageBar;
 	}
 
-	private void messageBarInit() {
-		mMessageBar = new MessageBar(this, true);
+	private void messageBarInit(Bundle inState) {
+		if (mMessageBar == null)
+			mMessageBar = new MessageBar(this, true);
+		
+	}
+	
+	private void messageBarOnSaveInstanceState(Bundle outState) {
+		if (mMessageBar != null)
+			outState.putBundle("mMessageBar", mMessageBar.onSaveInstanceState());
+	}
+	
+	private void messageBarOnRestoreInstanceState(Bundle inState) {
+		if (inState != null && inState.containsKey("mMessageBar"))
+			mMessageBar.onRestoreInstanceState(inState.getBundle("mMessageBar"));
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	// MY SLIDINGLAYER IMPLEMENTATION
 	// ------------------------------------------------------------------------------------------------
 
-	private void slidingLayerInit() {
+	private void slidingLayerInit(Bundle inState) {
 		mSlidingLayer = (CustomSlidingLayer) findViewById(R.id.left_slidebar);
 		mSettingsSlidingLayer = (CustomSlidingLayer) findViewById(R.id.settings_slidebar);
 		mChatSlidingLayer = (CustomSlidingLayer) findViewById(R.id.chat_slidebar);
+		CustomSlidingLayer.unregisterAll();
 		mSlidingLayer.register();
 		mSettingsSlidingLayer.register();
 		mChatSlidingLayer.register();
+		
+//		slidingLayerOnRestoreInstanceState(inState);
 
 		findViewById(R.id.buttonExit).setOnClickListener(this);
 	}
@@ -323,6 +383,58 @@ public class MasterActivity
 	// CHAT SLIDINGLAYER
 	// ------------------------------
 	private CustomSlidingLayer mChatSlidingLayer = null;
+	
+	private void slidingLayerOnSaveInstanceState(Bundle outState) {
+//		if (outState != null) {
+		Log.d("MasterActivity", "openSlidingLayer... @onSave: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
+			outState.putInt("openSlidingLayerAtTimeOfOnSaveInstanceState", openSlidingLayerAtTimeOfOnPause);
+//		}
+	}
+	
+	private void slidingLayerOnRestoreInstanceState(Bundle inState) {
+		if (inState != null) {
+			Log.d("MasterActivity", "isState != null" + " [" + CustomSlidingLayer.numberRegistered() + "]");
+			openSlidingLayerAtTimeOfOnPause = inState.getInt("openSlidingLayerAtTimeOfOnSaveInstanceState");
+//			if (openLayer != CustomSlidingLayer.NULL_ID) {
+//				CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
+//			}
+			Log.d("MasterActivity", "openSlidingLayer... @onRestore: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
+		}
+	}
+	
+//	private void slidingLayerOnCreate() {
+//		// reopen sliders closed when onPause
+//		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
+//			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
+//		}
+//	}
+	
+	private void slidingLayerOnResume() {
+
+	}
+	
+	private void slidingLayerOnPostResume() {
+		// reopen sliders closed when onPause
+		Log.d("MasterActivity", "openSlidingLayer... @onPostResume: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
+		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
+			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
+		}
+	}
+	
+	private void slidingLayerOnPause() {
+		// remember and close sliders for reopening in onResume
+		Log.d("MasterActivity", "openSlidingLayer... @onPause: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
+		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
+		CustomSlidingLayer.closeAllSlidingLayers();
+		Log.d("MasterActivity", "openSlidingLayer... @onPause: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
+	}
+	
+//	private void slidingLayerOnDestroy() {
+//		// remember and close sliders for reopening in onResume
+//		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
+//		CustomSlidingLayer.closeAllSlidingLayers();
+//	}
+
 	
 	// ------------------------------------------------------------------------------------------------
 	// REQUIRED FOR MESSAGEBAR
@@ -345,27 +457,6 @@ public class MasterActivity
 		mMessageBar = new MessageBar(layout, true);
 	}
 
-//	@Override
-//	protected void onSaveInstanceState(Bundle outState) {
-//		super.onSaveInstanceState(outState);
-//		if (mMessageBar != null)
-//			outState.putBundle("mMessageBar", mMessageBar.onSaveInstanceState());
-//		
-//		boolean[] serverANDclientState = new boolean[] { getIsServerRunning(), getIsClientRunning()};
-//		outState.putBooleanArray("serverANDclientState", serverANDclientState);
-//	}
-//
-//	@Override
-//	protected void onRestoreInstanceState(Bundle inState) {
-//		super.onRestoreInstanceState(inState);
-//		if (inState.containsKey("mMessageBar"))
-//			mMessageBar.onRestoreInstanceState(inState.getBundle("mMessageBar"));
-//		
-//		boolean[] serverANDclientState = inState.getBooleanArray("serverANDclientState");
-//		sFragmentOn = serverANDclientState[0];
-//		cFragmentOn = serverANDclientState[1];
-//	}
-	//
 	
 	// ------------------------------------------------------------------------------------------------
 	// MY KRYONET IMPLEMENTATION
@@ -375,7 +466,7 @@ public class MasterActivity
 	protected FragmentManager getMasterFragmentManager() {
 		return fm;
 	}
-	private Intent cSs, cCs;
+	private Intent chatServerService, chatClientService;
 	private ChatServerFragment sFragment;
 	private ChatClientFragment cFragment;
 	
@@ -391,7 +482,10 @@ public class MasterActivity
 	private void promptClient() {
 		final AutoCompleteTextView etHost = new AutoCompleteTextView(MasterActivity.this);
 		etHost.setHint("Ex: \"192.168.254.254\" or \"localhost\"");
-		final String[] values = { "localhost", "192.168.1.26", "192.168.1.13", "192.168.24.192" };
+		final String[] values = { "localhost",
+				"192.168.5.65", "192.168.5.64",
+//				"192.168.1.26", "192.168.1.13", 
+				"192.168.24.192" };
 		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, values);
 		etHost.setThreshold(256);
 		etHost.setAdapter(adapter);
@@ -410,7 +504,8 @@ public class MasterActivity
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
-					startConnect(etHost);
+					Global.Local.hostname = etHost.getText().toString().trim();
+					processInputToStartChat(Global.Local.hostname);
 				}
 			})
 		  .setView(etHost)
@@ -423,7 +518,7 @@ public class MasterActivity
 						&& (keyCode == KeyEvent.KEYCODE_ENTER)
 						&& (!event.isShiftPressed())) {
 					connection.dismiss();
-					startConnect(etHost);
+					processInputToStartChat(etHost.getText().toString().trim());
 					return true;
 				}
 				return false;
@@ -433,8 +528,7 @@ public class MasterActivity
 		connection.show();
 	}
 	
-	private void startConnect(EditText etHost) {
-		final String hostIP = etHost.getText().toString().trim();
+	private void processInputToStartChat(final String hostIP) {
 		if (hostIP.equalsIgnoreCase("localhost") || hostIP.equalsIgnoreCase("")) {
 			startServer();
 		}
@@ -446,24 +540,8 @@ public class MasterActivity
 		if (fm == null)
 			fm = getSupportFragmentManager();
 		
-		initClient();
-	}
-	
-	private void kryonetOnResume() {
-//		startServerFragment();
-//		startClientFragment();
-	}
-	
-	private void kryonetOnPause() {
-//		stopServerFragment();
-//		stopClientFragment();
-	}
-	
-	private boolean sFragmentOn = false;
-	private boolean cFragmentOn = false;
-	private void startServerFragment() {
-//		if (!sFragmentOn) {
-		
+
+		// startServerFragment
 		sFragment = (ChatServerFragment) getSupportFragmentManager().findFragmentByTag("sFragment");
 		
 		if (sFragment == null) {
@@ -475,50 +553,62 @@ public class MasterActivity
 			ftServer.commit();
 		}
 		
-//		}
-	}
-	
-	private void stopServerFragment() {
-//		if (sFragmentOn) {
-			FragmentTransaction ftServer = fm.beginTransaction();
-			ftServer.remove(sFragment);
-			ftServer.commit();
-//		}
-	}
-	
-	private void startClientFragment() {
-//		if (!cFragmentOn) {
-		
+		// startClientFragment
 		cFragment = (ChatClientFragment) getSupportFragmentManager().findFragmentByTag("cFragment");
 		
 		if (cFragment == null) {
 			FragmentTransaction ftClient = fm.beginTransaction();
 			cFragment = new ChatClientFragment();
-//			cFragment.setArguments(getIntent().getExtras());
-			// replace?
+			cFragment.setArguments(getIntent().getExtras());
 			ftClient.replace(R.id.llChatClientHolder, cFragment, "cFragment");
 			ftClient.addToBackStack(null);
 			ftClient.commit();
         }
 		
-//		}
+		initClient();
+	}
+
+	private void kryonetOnSaveInstanceState(Bundle outState) {
+		if (outState != null) {
+			boolean[] servicesRunning = new boolean[] { isServerRunning, isClientRunning };
+			outState.putBooleanArray("servicesRunning", servicesRunning);
+		}
 	}
 	
-	private void stopClientFragment() {
-//		if (cFragmentOn) {
-			FragmentTransaction ftClient = fm.beginTransaction();
-			ftClient.remove(cFragment);
-			ftClient.commit();
-//		}
+
+	private void kryonetOnRestoreInstanceState(Bundle inState) {
+		if (inState != null) {
+			boolean[] servicesRunning = inState.getBooleanArray("servicesRunning");
+			isServerRunning = servicesRunning[0];
+			isClientRunning = servicesRunning[1];
+		}
+	}
+	
+	private void kryonetOnPause() {
+		if (isServerRunning) {
+			sFragment.unbindServerService();
+		}
+		if (isClientRunning) {
+			cFragment.unbindClientService();
+		}
+	}
+	
+	private void kryonetOnResume() {
+		if (isServerRunning) {
+			sFragment.bindServerService();
+		}
+		if (isClientRunning) {
+			cFragment.bindClientService();
+		}
 	}
 	
 	private void startServer() {
 		if (!isServerRunning) {
-			startServerFragment();
-			sFragmentOn = true;
+			// startServer
+			sFragment.bindServerService();
 			
-			cSs = new Intent(MasterActivity.this, ChatServer.class);
-			startService(cSs);
+//			chatServerService = new Intent(MasterActivity.this, ChatServer.class);
+			startService(getChatServerService());
 
 			isServerRunning = !isServerRunning;
 		}
@@ -526,24 +616,34 @@ public class MasterActivity
 
 	private void stopServer() {
 		if (isServerRunning) {
-			stopService(cSs);
+			// stopServer
+			termServer();
+			
+			stopService(getChatServerService());
 
-			stopServerFragment();
-			sFragmentOn = false;
+			sFragment.unbindServerService();
 			
 			isServerRunning = !isServerRunning;
 		}
-	}	
+	}
+	
+	private void termServer() {
+		
+		
+		// stopServerFragment
+		FragmentTransaction ftServer = fm.beginTransaction();
+		ftServer.remove(sFragment);
+		ftServer.commit();
+	}
 
 	private void startClient(final String host) {
 		if (!isClientRunning) {
 			// startClient
-			startClientFragment();
-			cFragmentOn = true;
+			cFragment.bindClientService();
 
-			cCs = new Intent(MasterActivity.this, ChatClient.class);
-			cCs.putExtra("host", host);
-			startService(cCs);
+//			chatClientService = new Intent(MasterActivity.this, ChatClient.class);
+//			chatClientService.putExtra("host", host);
+			startService(getChatClientService());
 			
 			initClient();
 			
@@ -553,15 +653,30 @@ public class MasterActivity
 	
 	private void stopClient() {
 		if (isClientRunning) {
+			//stopClient
 			termClient();
 			
-			stopService(cCs);
-
-			stopClientFragment();
-			cFragmentOn = false;
+			stopService(getChatClientService());
+			
+			cFragment.unbindClientService();
 			
 			isClientRunning = !isClientRunning;
 		}
+	}
+	
+	private Intent getChatServerService() {
+		if (chatServerService == null) {
+			chatServerService = new Intent(MasterActivity.this, ChatServer.class);
+		}
+		return chatServerService;
+	}
+	
+	private Intent getChatClientService() {
+		if (chatClientService == null) {
+			chatClientService = new Intent(MasterActivity.this, ChatClient.class);
+			chatClientService.putExtra("host", Global.Local.hostname);
+		}
+		return chatClientService;
 	}
 	
 	private void termClient() {
@@ -573,7 +688,25 @@ public class MasterActivity
 				showMessage("Client Not Connected", true);
 			}
 		});
+		stSendBar.setIsTypingListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+		stSendBar.setIsNotTypingListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+		
+		//stopClientFragment
+		FragmentTransaction ftClient = fm.beginTransaction();
+		ftClient.remove(cFragment);
+		ftClient.commit();
 	}
+
 	
 	private InternalNotification iNotify;
 	private void initClient() {
@@ -581,17 +714,33 @@ public class MasterActivity
 		// --------------------------------------------------------------
 		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
 		boolean connected = false;
-		if (cFragment != null && cFragment.isChatClientConnected()) {
-			connected = true;
-			stSendBar.setSendListener(new Runnable() {
-				@Override
-				public void run() {
-					final String msg = stSendBar.getText().toString().trim();
-					if (msg != null && msg.length() > 0) {
-						cFragment.sendMessage(msg);
+		if (cFragment != null) {
+			connected = cFragment.isChatClientConnected();
+			
+//			if (cFragment.isChatClientConnected()) {
+				stSendBar.setSendListener(new Runnable() {
+					@Override
+					public void run() {
+						final String msg = stSendBar.getText().toString()
+								.trim();
+						if (msg != null && msg.length() > 0) {
+							cFragment.sendMessage(msg);
+						}
 					}
-				}
-			});
+				});
+				stSendBar.setIsTypingListener(new Runnable() {
+					@Override
+					public void run() {
+						cFragment.sendSystemMessage("isTyping");
+					}
+				});
+				stSendBar.setIsNotTypingListener(new Runnable() {
+					@Override
+					public void run() {
+						cFragment.sendSystemMessage("isNotTyping");
+					}
+				});
+//			}
 		}
 		stSendBar.setConnected(connected);
 
@@ -623,7 +772,7 @@ public class MasterActivity
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						initClient();
+						stSendBar.setConnected(true);
 					}
 				});
 			}
@@ -640,12 +789,12 @@ public class MasterActivity
 			
 			@Override
 			protected void disconnected(final ChatConnection chatConnection) {
-//				runOnUiThread(new Runnable() {
-//					@Override
-//					public void run() {
-//						iNotify.show("Exited: " + chatConnection.name, 2000);
-//					}
-//				});
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						stSendBar.setConnected(false);
+					}
+				});
 			}
 		};
 
@@ -662,13 +811,23 @@ public class MasterActivity
 	public ImageLoader getImageLoader() {
 		return imageLoader;
 	}
-	private void universalImageLoaderInit() {
+	
+	private void universalImageLoaderInit(Bundle inState) {
 		File cacheDir = StorageUtils.getCacheDirectory(MasterActivity.this);
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(MasterActivity.this)
-			.memoryCacheExtraOptions(320, 448) // default = device screen dimensions
-			.build();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				MasterActivity.this).memoryCacheExtraOptions(320, 448) // default
+																		// =
+																		// device
+																		// screen
+																		// dimensions
+				.build();
 		imageLoader = ImageLoader.getInstance();
 		imageLoader.init(config);
+
+	}
+	
+	private void universalImageLoaderTerm() {
+		imageLoader.destroy();
 	}
 
 }

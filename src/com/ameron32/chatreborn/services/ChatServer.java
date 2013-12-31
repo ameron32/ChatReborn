@@ -10,13 +10,8 @@ import android.os.IBinder;
 import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
 import com.ameron32.chatreborn.chat.Utils;
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.frmwk.ChatService;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Server;
@@ -182,7 +177,7 @@ public class ChatServer extends ChatService {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		com.esotericsoftware.minlog.Log
 				.set(com.esotericsoftware.minlog.Log.LEVEL_DEBUG);
-		startServer();
+		if (intent != null) startServer();
 		return super.onStartCommand(intent, flags, startId);
 	}
 

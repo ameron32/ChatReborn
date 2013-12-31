@@ -16,12 +16,7 @@ import android.widget.Toast;
 
 import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
 import com.ameron32.chatreborn.services.ChatClient;
@@ -34,7 +29,7 @@ import com.esotericsoftware.minlog.Log;
 
 public class ChatClientFragment extends Fragment {
 	
-	private View v;
+//	private View v;
 	
 	// ----------------------------------------
 	// LIFECYCLE CODE
@@ -42,8 +37,7 @@ public class ChatClientFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		v = inflater.inflate(R.layout.chat_client, container, false);
-		return v;
+		return inflater.inflate(R.layout.chat_client, container, false);
 	}
 	
 	@Override
@@ -80,7 +74,10 @@ public class ChatClientFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-
+	}
+	
+	public void bindClientService() {
+		
 		getActivity().bindService(new Intent(getActivity(), ChatClient.class), mConnection, ContextWrapper.BIND_AUTO_CREATE);
 		chatClientListener2.setDisabled(false);
 		if (chatFrame == null) 
@@ -92,9 +89,13 @@ public class ChatClientFragment extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
+	}
+	
+	public void unbindClientService() {
 
 		getActivity().unbindService(mConnection);
 		chatClientListener2.setDisabled(true);
+		
 		chatFrame = null;
 	}
 	
@@ -124,6 +125,21 @@ public class ChatClientFragment extends Fragment {
 		protected void received(final UpdateNames updateNames, final ChatConnection chatConnection) {
 			chatFrame.setNames(updateNames.names);
 		}
+		
+		@Override
+		protected void received(final SystemMessage systemMessage,
+				final ChatConnection chatConnection) {
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (systemMessage.getText().equals("isTyping")) {
+						chatFrame.setIsTyping(systemMessage.name, true);
+					} else if (systemMessage.getText().equals("isNotTyping")) {
+						chatFrame.setIsTyping(systemMessage.name, false);
+					}
+				}
+			});
+		}
 
 		@Override
 		protected void disconnected(final ChatConnection chatConnection) {
@@ -146,6 +162,26 @@ public class ChatClientFragment extends Fragment {
 				if (isBound_mConnection) {
 					NetworkTask task = new NetworkTask(Task.SendMessage,
 							chatClient, chatMessage);
+					task.execute();
+				} else {
+					Log.error(getClass().getSimpleName(),
+							"ChatClient not bound");
+				}
+			}
+		};
+		r.run();
+	}
+	
+	public void sendSystemMessage(final String msg) {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				final SystemMessage systemMessage = new SystemMessage();
+				systemMessage.name = username;
+				systemMessage.setText(msg);
+				if (isBound_mConnection) {
+					NetworkTask task = new NetworkTask(Task.SendMessage,
+							chatClient, systemMessage);
 					task.execute();
 				} else {
 					Log.error(getClass().getSimpleName(),

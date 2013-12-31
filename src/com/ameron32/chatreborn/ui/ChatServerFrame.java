@@ -8,7 +8,7 @@ import com.ameron32.knbasic.core.chat.R;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.Utils;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 
 import android.app.Activity;
 import android.content.Context;

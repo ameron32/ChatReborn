@@ -1,11 +1,6 @@
 package com.ameron32.chatreborn.chat;
 
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;

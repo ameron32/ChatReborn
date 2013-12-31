@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
@@ -39,18 +40,33 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 		}
 	}
 	
-	private boolean isSlidingLayerOpen = false;
+	public static int numberRegistered() {
+		return customSlidingLayers.size();
+	}
+	
+//	private boolean isSlidingLayerOpen = false;
 	private boolean isTouchEnabled = false;
 	public void setTouchEnabled(boolean state) {
 		isTouchEnabled = state;
 	}
 	
+	public static void unregisterAll() {
+		customSlidingLayers.clear();
+	}
+	
 	public void register() {
+		for (CustomSlidingLayer csl : customSlidingLayers) {
+			if (csl.getId() == this.getId()) return;
+		}
+		addToRegister();
+	}
+	
+	private void addToRegister() {
 		customSlidingLayers.add(this);
 	}
 	
 	public boolean isSlidingLayerOpen() {
-		return isSlidingLayerOpen;
+		return isOpened();
 	}
 		
 	public void closeSlidingLayer() {
@@ -66,9 +82,12 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 	}
 	
 	public static void openSlidingLayer(int id) {
+		Log.d("CustomSlidingLayer", "numCSL:" + customSlidingLayers.size());
 		for (CustomSlidingLayer csl : customSlidingLayers) {
+			Log.d("CustomSlidingLayer", csl.getId() + ":" + id);
 			if (csl.getId() == id) {
-				csl.openSlidingLayer();
+				Log.d("CustomSlidingLayer", "opening " + csl.getId());
+				csl.openLayer(true);
 			}
 		}
 	}
@@ -81,7 +100,7 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 	 * If not null, switch case on view IDs. If null, auto-open sliding layer.
 	 */
 	private void slidingLayerToggle() {
-		if (isSlidingLayerOpen) {
+		if (isOpened()) {
 			closeLayer(true);
 			if (onCloseRunnable != null)
 				onCloseRunnable.run();
@@ -90,7 +109,7 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 			if (onOpenRunnable != null)
 				onOpenRunnable.run();
 		}
-		isSlidingLayerOpen = !isSlidingLayerOpen;
+//		isSlidingLayerOpen = !isSlidingLayerOpen;
 	}
 	
 	/**
@@ -103,7 +122,12 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 			CustomSlidingLayer.closeAllSlidingLayers();
 		}
 		
-		super.openLayer(smoothAnim);
+		super.openLayer(false);
+	}
+	
+	@Override 
+	public void closeLayer(boolean smoothAnim) {
+		super.closeLayer(false);
 	}
 	
 	public CustomSlidingLayer(Context context, AttributeSet attrs, int defStyle) {
@@ -136,4 +160,6 @@ public class CustomSlidingLayer extends com.slidinglayer.SlidingLayer {
 		if (!isTouchEnabled) return false;
 		return super.onTouchEvent(ev);
 	}
+	
+	
 }

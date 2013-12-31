@@ -18,7 +18,7 @@
         android:id="@+id/slvChatHistory"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
+        android:layout_above="@+id/tvIsTyping"
         android:layout_below="@+id/relativeLayout1"
         swipe:swipeActionLeft="reveal"
         swipe:swipeAnimationTime="500"
@@ -27,6 +27,14 @@
         swipe:swipeFrontView="@+id/front"
         swipe:swipeMode="left"
         swipe:swipeOpenOnLongPress="true" />
+    
+    <TextView
+        android:id="@+id/tvIsTyping"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+         />
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"

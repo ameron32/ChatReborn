@@ -3,12 +3,7 @@ package com.ameron32.chatreborn.fragments;
 import com.ameron32.knbasic.core.chat.R;
 import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
 import com.ameron32.chatreborn.services.ChatClient;
@@ -70,6 +65,9 @@ public class ChatServerFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
+	}
+	
+	public void bindServerService() {
 		getActivity().bindService(getCSS(), mConnection, ContextWrapper.BIND_AUTO_CREATE);
 		chatServerListener2.setDisabled(false);
 		if (chatFrame == null) chatFrame = new ChatServerFrame(getActivity(), v);
@@ -98,9 +96,14 @@ public class ChatServerFragment extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
+
+	}
+	
+	public void unbindServerService() {
 		getActivity().unbindService(mConnection);
 		chatServerListener2.setDisabled(true);
-//		chatFrame = null;
+
+		chatFrame = null;
 	}
 	
 	@Override

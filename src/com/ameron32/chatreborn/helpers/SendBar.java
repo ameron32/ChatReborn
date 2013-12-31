@@ -193,15 +193,26 @@ public class SendBar extends RelativeLayout {
 
 	private void setShowHideButtonsListener() {
 		etMessage.addTextChangedListener(new TextWatcher() {
+			boolean toggle = false;
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before,
 					int count) {
 				// TODO Auto-generated method stub
 				if (s.length() > 0) {
+					if (toggle == false) {
+						toggle = true;
+						SendTask sendTask = new SendTask(isTypingListener, false);
+						sendTask.execute();
+					}
 					btn_clear.setVisibility(RelativeLayout.VISIBLE);
 					if (connected) 
 						ibSend.setVisibility(RelativeLayout.VISIBLE);
 				} else {
+					if (toggle == true) {
+						SendTask sendTask = new SendTask(isNotTypingListener, false);
+						sendTask.execute();
+						toggle = false;
+					}
 					btn_clear.setVisibility(RelativeLayout.INVISIBLE);
 					if (connected && (ibSend.getVisibility() != RelativeLayout.INVISIBLE)) 
 						ibSend.setVisibility(RelativeLayout.INVISIBLE);
@@ -228,9 +239,11 @@ public class SendBar extends RelativeLayout {
 	
 	public class SendTask extends AsyncTask<String, Integer, String> {
 		private Runnable listener;
+		private boolean resetWhenComplete;
 		
-		public SendTask(Runnable listener) {
+		public SendTask(Runnable listener, boolean resetWhenComplete) {
 			this.listener = listener;
+			this.resetWhenComplete = resetWhenComplete;
 		}
 		
 		@Override
@@ -242,7 +255,7 @@ public class SendBar extends RelativeLayout {
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
-			resetEditText();
+			if (resetWhenComplete) resetEditText();
 		}
 	}
 	
@@ -250,7 +263,7 @@ public class SendBar extends RelativeLayout {
 		ibSend.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				SendTask sendTask = new SendTask(sendListener);
+				SendTask sendTask = new SendTask(sendListener, true);
 				sendTask.execute();
 			}
 		});
@@ -260,7 +273,7 @@ public class SendBar extends RelativeLayout {
 				if ((event.getAction() == KeyEvent.ACTION_DOWN)
 						&& (keyCode == KeyEvent.KEYCODE_ENTER)
 						&& (!event.isShiftPressed())) {
-					SendTask sendTask = new SendTask(sendListener);
+					SendTask sendTask = new SendTask(sendListener, true);
 					sendTask.execute();
 					return true;
 				}
@@ -272,7 +285,7 @@ public class SendBar extends RelativeLayout {
 			public boolean onEditorAction(TextView v, int actionId,
 					KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_SEND) {
-					SendTask sendTask = new SendTask(sendListener);
+					SendTask sendTask = new SendTask(sendListener, true);
 					sendTask.execute();
 					return true;
 				}
@@ -293,11 +306,20 @@ public class SendBar extends RelativeLayout {
 	public void setConnected(boolean connected) {
 		this.connected = connected;
 		
-		if (connected) {
+		if (this.connected) {
 			setVisibility(VISIBLE);
 		} else {
 			setVisibility(INVISIBLE);
 		}
 
+	}
+
+	Runnable isTypingListener, isNotTypingListener;
+	public void setIsTypingListener(Runnable runnable) {
+		isTypingListener = runnable;
+	}
+
+	public void setIsNotTypingListener(Runnable runnable) {
+		isNotTypingListener = runnable;
 	}
 }

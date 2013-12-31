@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.chat.Utils;
 import com.ameron32.chatreborn.chat.Global.Local;
 import com.ameron32.chatreborn.services.ChatClient;

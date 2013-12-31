@@ -6,12 +6,7 @@ import android.os.IBinder;
 import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.RegisterName;
-import com.ameron32.chatreborn.chat.Network.ServerChatHistory;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
-import com.ameron32.chatreborn.chat.Network.UpdateNames;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.frmwk.ChatService;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
 import com.esotericsoftware.kryonet.Client;
@@ -68,6 +63,7 @@ public class ChatClient extends ChatService {
 		
 		@Override
 		protected void received(final UpdateNames updateNames, final ChatConnection chatConnection) {
+			Global.Local.groupUsers = updateNames.names;
 			if (!isBound) {
 				notifyMessage("Users Changed");
 			}
@@ -127,7 +123,7 @@ public class ChatClient extends ChatService {
 		com.esotericsoftware.minlog.Log
 			.set(com.esotericsoftware.minlog.Log.LEVEL_DEBUG);
 		if (!isStarted) {
-			connect(intent.getStringExtra("host"));
+			if (intent != null)	connect(intent.getStringExtra("host"));
 			isStarted = true;
 		}
 		return super.onStartCommand(intent, flags, startId);

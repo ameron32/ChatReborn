@@ -23,7 +23,7 @@ public class ChatClientFrame {
 	final Context context;
 	final View parentView;
 
-	private TextView tvUsers, tvConnection;
+	private TextView tvUsers, tvConnection, tvIsTyping;
 	private ScrollView svChatRecord;
 	private ProgressBar pbMain;
 
@@ -31,6 +31,8 @@ public class ChatClientFrame {
 		tvUsers = (TextView) parentView.findViewById(R.id.tvUsers2);
 		tvConnection = (TextView) parentView.findViewById(R.id.tvConnection2);
 
+		tvIsTyping = (TextView) parentView.findViewById(R.id.tvIsTyping);
+		
 		pbMain = (ProgressBar) parentView.findViewById(R.id.pbMain2);
 
 		slvChatHistory = (SwipeListView) parentView.findViewById(R.id.slvChatHistory);
@@ -83,11 +85,6 @@ public class ChatClientFrame {
 		});
 	}
 
-//	Runnable notifyChange;
-//	public void setUITask(final Runnable listener) {
-//		notifyChange = listener;
-//	}
-
 	public void scrollToBottomChat() {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -95,7 +92,6 @@ public class ChatClientFrame {
 				svChatRecord.post(new Runnable() {
 					@Override
 					public void run() {
-//						svChatRecord.fullScroll(View.FOCUS_DOWN);
 						slvChatHistory.setSelection(chatAdapter.getCount() - 1);
 					}
 				});
@@ -145,5 +141,11 @@ public class ChatClientFrame {
 			 netInfo += "\n" + "Local: " + Utils.getIPAddress(true);
 		 }
 		 setConnectionText(netInfo);
+		 setNames(Global.Local.groupUsers);
+	}
+	
+	public void setIsTyping(String username, boolean isTyping) {
+		if (isTyping) tvIsTyping.setText(username + " is typing...");
+		else tvIsTyping.setText("");
 	}
 }

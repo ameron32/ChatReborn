@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -34,13 +35,13 @@ public class ChatService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		startNotification(getSTART_NOTIFICATION_ID());
-		return START_NOT_STICKY;
+		return START_STICKY;
 	}
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		stopNotification(getSTOP_NOTIFICATION_ID());
+		super.onDestroy();
 	}
 
 	// --------------------------------------
@@ -133,6 +134,12 @@ public class ChatService extends Service {
 		nManager.notify(getSTOP_NOTIFICATION_ID(), builder.build());
 	}
 
+	// --------------------------------------
+	// NETWORK THREAD HANDLING
+	// --------------------------------------
+	
+
+	
 	// --------------------------------------
 	// GETTER / SETTER
 	// --------------------------------------

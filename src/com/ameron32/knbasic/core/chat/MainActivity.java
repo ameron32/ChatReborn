@@ -39,47 +39,6 @@ public class MainActivity extends MasterActivity {
 		super.onCreate(savedInstanceState);
 
 		
-		// create and configure new custom settings buttons in the sliding menu
-		// -------------------------------------------------------------------------
-		addMenuButton("Toggle Server/Client", 2, new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (!getIsClientRunning()) {
-					chatConnect();
-				} else {
-					chatDisconnect();
-				}
-			}
-		});
-//		addMenuButton("Toggle Server/Client", 2, new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				chatDisconnect();
-//			}
-//		});
-//		addMenuButton("Cycle Font", 2, new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				int max = Fonts.values().length;
-//				int newFont = 0;
-//				if (currentFont != max - 1) {
-//					currentFont++;
-//					newFont = currentFont;
-//				} else {
-//					currentFont = 0;
-//				}
-//
-//				tv.setTypeface(Loader.fonts.get(Fonts.values()[newFont]));
-//			}
-//		});
-		addMenuButton("Settings", 1, new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showMessage("Not yet implemented", true);
-			}
-		});
-		
-
 		// change the font of the titlebar in ActionBar Sherlock
 		// -------------------------------------------------------------------------
 		getCustomTitle().setTypeface(Loader.fonts.get(Fonts.temphisdirty));
@@ -106,6 +65,26 @@ public class MainActivity extends MasterActivity {
 	@Override
 	protected void onPostResume() {
 		super.onPostResume();
+		
+		// create and configure new custom settings buttons in the sliding menu
+		// -------------------------------------------------------------------------
+		addMenuButton("Toggle Server/Client", 2, new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!getIsClientRunning()) {
+					chatConnect();
+				} else {
+					chatDisconnect();
+				}
+			}
+		});
+		addMenuButton("Settings", 1, new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showMessage("Not yet implemented", true);
+			}
+		});
+		
 		// Testing commands (comment out or delete prior to production)
 		performTest();
 	}
@@ -143,7 +122,7 @@ public class MainActivity extends MasterActivity {
 	// ------------------------------------------------------------------------------------------------
 
 	private void performTest() {
-//		fillDummyData();
+		fillDummyData();
 //		generateSmartImageView();
 //		instanceChromeView();
 	}
@@ -152,34 +131,34 @@ public class MainActivity extends MasterActivity {
 	// SMARTIMAGEVIEW testing
 	// ------------------------------------------------------------------------------------------------
 
-	private int counter = 0;
-	private boolean random = true;
+//	private int counter = 0;
+//	private boolean random = true;
 
-	private void generateSmartImageView() {
-		final LinearLayout primary = ((LinearLayout) findViewById(R.id.llPrimary));
-		// primary.setOnClickListener(new View.OnClickListener() {
-		// @Override
-		// public void onClick(View v) {
-		// // generateNewCard(primary, 10);
-		// }
-		// });
-		generateNewCard(primary, 2);
-	}
+//	private void generateSmartImageView() {
+//		final LinearLayout primary = ((LinearLayout) findViewById(R.id.llPrimary));
+//		// primary.setOnClickListener(new View.OnClickListener() {
+//		// @Override
+//		// public void onClick(View v) {
+//		// // generateNewCard(primary, 10);
+//		// }
+//		// });
+//		generateNewCard(primary, 2);
+//	}
 
-	private void generateNewCard(LinearLayout primary, int times) {
-		final String[] cards = null; // getResources().getStringArray(R.array.cards);
-		if (random)
-			counter = new java.util.Random().nextInt(cards.length);
-		for (int i = 0; i < times; i++) {
-			final FlipImageView smartImageView = new FlipImageView(this);
-			smartImageView
-
-			.setImageUrl("http://wow.tcgbrowser.com/images/cards/hd/"
-					+ cards[counter] + ".jpg");
-			primary.addView(smartImageView);
-			counter++;
-		}
-	}
+//	private void generateNewCard(LinearLayout primary, int times) {
+//		final String[] cards = null; // getResources().getStringArray(R.array.cards);
+//		if (random)
+//			counter = new java.util.Random().nextInt(cards.length);
+//		for (int i = 0; i < times; i++) {
+//			final FlipImageView smartImageView = new FlipImageView(this);
+//			smartImageView
+//
+//			.setImageUrl("http://wow.tcgbrowser.com/images/cards/hd/"
+//					+ cards[counter] + ".jpg");
+//			primary.addView(smartImageView);
+//			counter++;
+//		}
+//	}
 
 	// ------------------------------------------------------------------------------------------------
 	// DUMMY DATA FOR LISTVIEW

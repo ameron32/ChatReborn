@@ -9,9 +9,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.ameron32.chatreborn.chat.Network.ChatMessage;
-import com.ameron32.chatreborn.chat.Network.MessageClass;
-import com.ameron32.chatreborn.chat.Network.SystemMessage;
+import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.knbasic.core.chat.MainActivity;
 import com.ameron32.knbasic.core.chat.R;
 
@@ -118,6 +116,8 @@ public class ChatAdapter extends BaseAdapter {
 		
         return convertView;
     }
+    
+    
     
     public static class ViewHolder {
         TextView tvTime, tvUsr, tvMsg;
