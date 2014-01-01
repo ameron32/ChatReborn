@@ -36,7 +36,7 @@ public class ChatClientFrame {
 		pbMain = (ProgressBar) parentView.findViewById(R.id.pbMain2);
 
 		slvChatHistory = (SwipeListView) parentView.findViewById(R.id.slvChatHistory);
-		chatAdapter = new ChatAdapter(context, Global.Local.getClientChatHistory());
+		chatAdapter = new ChatAdapter(context, Global.Local.getFilteredClientChatHistory());
 		slvChatHistory.setAdapter(chatAdapter);
 		slvChatHistory.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 		slvChatHistory.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -92,7 +92,7 @@ public class ChatClientFrame {
 				svChatRecord.post(new Runnable() {
 					@Override
 					public void run() {
-						slvChatHistory.setSelection(chatAdapter.getCount() - 1);
+//						slvChatHistory.setSelection(chatAdapter.getCount() - 1);
 					}
 				});
 			}

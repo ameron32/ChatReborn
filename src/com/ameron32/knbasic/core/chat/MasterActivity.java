@@ -26,6 +26,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -102,14 +104,12 @@ public class MasterActivity
 		d.show();
 	}
 	
-	protected void addMenuButton(String title, int buttonId, View.OnClickListener listener) {
+	private LinearLayout llSettings;
+	protected void addMenuButton(final String title, final int buttonId, final View.OnClickListener listener) {
 		final int master_key = 978979798;
 					
-		LinearLayout llSettings = (LinearLayout) findViewById(R.id.llCustomMenu);
-		for (int i = 0; i < llSettings.getChildCount(); i++) {
-			Button b = (Button) llSettings.getChildAt(i);
-			if ((Integer)b.getTag(master_key) == buttonId) return;
-		}
+		llSettings = (LinearLayout) findViewById(R.id.llCustomMenu);
+		if (blockDuplicate(master_key, buttonId)) return;
 			
 		// Create and attach button to top of settings drawer
 		Button customButton = ((Button) (LayoutInflater.from(this).inflate(R.layout.settings_button, null)));
@@ -118,6 +118,32 @@ public class MasterActivity
 			customButton.setOnClickListener(listener);
 		
 		llSettings.addView(customButton);
+	}
+	
+	protected void addMenuCheckBox(final String title, final int checkboxId, final CompoundButton.OnCheckedChangeListener checkedListener) {
+		final int master_key = 978979799;
+		
+		llSettings = (LinearLayout) findViewById(R.id.llCustomMenu);
+		if (blockDuplicate(master_key, checkboxId)) return;
+			
+		// Create and attach button to top of settings drawer
+		CheckBox checkbox = ((CheckBox) (LayoutInflater.from(this).inflate(R.layout.settings_checkbox, null)));
+			checkbox.setText(title);
+			checkbox.setTag(master_key, checkboxId);
+			checkbox.setOnCheckedChangeListener(checkedListener);
+		
+		llSettings.addView(checkbox);
+	}
+	
+	private boolean blockDuplicate(int master_key, int viewId) {
+		for (int i = 0; i < llSettings.getChildCount(); i++) {
+			View v = llSettings.getChildAt(i);
+			Object o = v.getTag(master_key);
+			if (o != null && ((Integer) o) == viewId) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	protected void chatConnect() {
@@ -129,6 +155,12 @@ public class MasterActivity
 	protected void chatDisconnect() {
 		stopClient();
 		stopServer();
+	}
+	
+	protected void refreshChatHistory() {
+		if (cFragment != null) {
+			cFragment.refreshChatHistory();
+		}
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -731,13 +763,21 @@ public class MasterActivity
 				stSendBar.setIsTypingListener(new Runnable() {
 					@Override
 					public void run() {
-						cFragment.sendSystemMessage("isTyping");
+						final SystemMessage systemMessage = new SystemMessage();
+						systemMessage.name = Global.Local.username;
+						systemMessage.setText("isTyping");
+						systemMessage.attachTags(MessageTag.ServerChatter);
+						cFragment.sendMessage(systemMessage);
 					}
 				});
 				stSendBar.setIsNotTypingListener(new Runnable() {
 					@Override
 					public void run() {
-						cFragment.sendSystemMessage("isNotTyping");
+						final SystemMessage systemMessage = new SystemMessage();
+						systemMessage.name = Global.Local.username;
+						systemMessage.setText("isNotTyping");
+						systemMessage.attachTags(MessageTag.ServerChatter);
+						cFragment.sendMessage(systemMessage);
 					}
 				});
 //			}

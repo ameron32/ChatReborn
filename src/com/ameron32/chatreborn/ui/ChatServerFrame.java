@@ -74,7 +74,7 @@ public class ChatServerFrame {
 						+ chatMessage;
 				tvChat.setText(allChat);
 				
-				svChatRecord.fullScroll(View.FOCUS_DOWN);
+//				svChatRecord.fullScroll(View.FOCUS_DOWN);
 			}
 		});
 	}

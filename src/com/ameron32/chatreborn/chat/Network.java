@@ -1,6 +1,7 @@
 package com.ameron32.chatreborn.chat;
 
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.esotericsoftware.kryo.Kryo;
@@ -20,6 +21,8 @@ public class Network {
 		kryo.register(SystemMessage.class);
 		kryo.register(ServerChatHistory.class);
 		kryo.register(TreeMap.class);
+		kryo.register(TreeSet.class);
+		kryo.register(MessageTag.class);
 	}
 
 	

@@ -36,7 +36,8 @@ public class ChatClient extends ChatService {
 			final SystemMessage request = new SystemMessage();
 			request.name = Global.Local.username;
 			request.setText("history request");
-			request.setIsHistoryRequest(true);
+//			request.setIsHistoryRequest(true);
+			request.attachTags(MessageTag.ClientHistoryRequest);
 			client.sendTCP(request);
 		}
 		

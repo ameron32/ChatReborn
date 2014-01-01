@@ -9,11 +9,14 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ameron32.chatreborn.chat.Global;
+import com.ameron32.chatreborn.chat.MessageTemplates.MessageTag;
 import com.ameron32.knbasic.core.helpers.Loader;
 import com.ameron32.knbasic.core.helpers.Loader.Fonts;
 import com.google.android.voiceime.VoiceRecognitionTrigger;
@@ -84,6 +87,20 @@ public class MainActivity extends MasterActivity {
 				showMessage("Not yet implemented", true);
 			}
 		});
+		addMenuCheckBox("ServerChatter", 1, new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (!isChecked) {
+					Global.Local.clientChatHistory.setFilters(MessageTag.ServerChatter);
+				} else {
+					Global.Local.clientChatHistory.setFilters();
+				}
+				refreshChatHistory();
+			}
+		});
+		
+		// set chatFilters
+		Global.Local.clientChatHistory.setFilters(MessageTag.ServerChatter);
 		
 		// Testing commands (comment out or delete prior to production)
 		performTest();

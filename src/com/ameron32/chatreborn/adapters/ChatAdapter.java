@@ -124,11 +124,6 @@ public class ChatAdapter extends BaseAdapter {
         Button bEdit, bHide, bDelete;
     }
 
-//	@Override
-//	public void notifyDataSetChanged() {
-//		super.notifyDataSetChanged();
-//	}
-	
 	public void clear() {
 		mData.clear();
 	}

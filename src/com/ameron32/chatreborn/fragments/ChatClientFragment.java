@@ -107,6 +107,7 @@ public class ChatClientFragment extends Fragment {
 		// nothing yet
 	}
 	
+	
 	// ----------------------------------------
 	// CHATLISTENER HANDLING
 	// ----------------------------------------
@@ -149,39 +150,35 @@ public class ChatClientFragment extends Fragment {
 		@Override
 		protected void onReceivedComplete(boolean wasChatObjectReceived) {
 //			if (wasChatObjectReceived)
-				chatFrame.refreshChatHistory();
+				refreshChatHistory();
 		}
 	};
+	
+	public void refreshChatHistory() {
+		chatFrame.refreshChatHistory();
+	}
 
 	public void sendMessage(final String msg) {
-		Runnable r = new Runnable() {
-			public void run() {
-				final ChatMessage chatMessage = new ChatMessage();
-				chatMessage.name = username;
-				chatMessage.setText(msg);
-				if (isBound_mConnection) {
-					NetworkTask task = new NetworkTask(Task.SendMessage,
-							chatClient, chatMessage);
-					task.execute();
-				} else {
-					Log.error(getClass().getSimpleName(),
-							"ChatClient not bound");
-				}
-			}
-		};
-		r.run();
+		final ChatMessage chatMessage = new ChatMessage();
+		chatMessage.name = username;
+		chatMessage.setText(msg);
+		sendMessage(chatMessage);
 	}
 	
 	public void sendSystemMessage(final String msg) {
+		final SystemMessage systemMessage = new SystemMessage();
+		systemMessage.name = username;
+		systemMessage.setText(msg);
+		sendMessage(systemMessage);
+	}
+	
+	public void sendMessage(final MessageClass mc) {
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
-				final SystemMessage systemMessage = new SystemMessage();
-				systemMessage.name = username;
-				systemMessage.setText(msg);
 				if (isBound_mConnection) {
 					NetworkTask task = new NetworkTask(Task.SendMessage,
-							chatClient, systemMessage);
+							chatClient, mc);
 					task.execute();
 				} else {
 					Log.error(getClass().getSimpleName(),
@@ -200,6 +197,7 @@ public class ChatClientFragment extends Fragment {
 			task.execute();
 		}
 	};
+	
 	
 	// ----------------------------------------
 	// SERVICECONNECTION HANDLING

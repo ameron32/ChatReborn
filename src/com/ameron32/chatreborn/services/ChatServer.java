@@ -43,30 +43,33 @@ public class ChatServer extends ChatService {
 		@Override
 		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			String message = null;
-			SystemMessage sourceSMessage = systemMessage;
-			message = sourceSMessage.getText();
+//			SystemMessage sourceSMessage = systemMessage;
+			message = systemMessage.getText();
 			if (message == null)
 				return;
 			message = message.trim();
 			if (message.length() == 0)
 				return;
 			
-			if (isHistoryRequest(sourceSMessage)) {
+			if (systemMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest)) {
 				sendHistory(chatConnection.getID());
 				
 				final SystemMessage historyRequestPlaceholder = new SystemMessage();
-				historyRequestPlaceholder.name = sourceSMessage.name;
-				historyRequestPlaceholder.setText("requested server chat history");
+				final String name = systemMessage.name;
+				historyRequestPlaceholder.name = name;
+				historyRequestPlaceholder.setText(name + ": requested server chat history");
+				historyRequestPlaceholder.attachTags(MessageTag.ServerChatter);
 				Global.Server.addToHistory(historyRequestPlaceholder);
 				// do not store the original ChatHistory requests. OMG break everything!
 				return;
 			}
 
-			SystemMessage sMessage = new SystemMessage();
-			sMessage.name = sourceSMessage.name;
-			sMessage.setText(message);
-			Global.Server.addToHistory(sMessage);
-			getServer().sendToAllTCP(sMessage);
+//			SystemMessage sMessage = new SystemMessage();
+//			sMessage.name = systemMessage.name;
+//			sMessage.setText(message);
+			systemMessage.setServerRelayed();
+			Global.Server.addToHistory(systemMessage);
+			getServer().sendToAllTCP(systemMessage);
 		}
 		
 		@Override
@@ -79,11 +82,12 @@ public class ChatServer extends ChatService {
 			if (message.length() == 0)
 				return;
 
-			final ChatMessage mMessage = new ChatMessage();
-			mMessage.name = chatMessage.name;
-			mMessage.setText(message);
-			Global.Server.addToHistory(mMessage);
-			getServer().sendToAllTCP(mMessage);
+//			final ChatMessage mMessage = new ChatMessage();
+//			mMessage.name = chatMessage.name;
+//			mMessage.setText(message);
+			chatMessage.setServerRelayed();
+			Global.Server.addToHistory(chatMessage);
+			getServer().sendToAllTCP(chatMessage);
 		}
 		
 		@Override
@@ -102,11 +106,12 @@ public class ChatServer extends ChatService {
 			chatConnection.name = name;
 
 			// create a new server notification
-			final SystemMessage sysMessage = new SystemMessage();
-			sysMessage.name = serverName;
-			sysMessage.setText(name + " connected.");
+			final SystemMessage systemMessage = new SystemMessage();
+			systemMessage.name = serverName;
+			systemMessage.setServerRelayed();
+			systemMessage.setText(name + " connected.");
 
-			getServer().sendToAllTCP(sysMessage);
+			getServer().sendToAllTCP(systemMessage);
 			
 			updateNames();
 		}
@@ -116,11 +121,13 @@ public class ChatServer extends ChatService {
 			if (chatConnection.name != null) {
 				// Announce to everyone that someone
 				// (with a registered name) has left.
-				final SystemMessage sysMessage = new SystemMessage();
-				sysMessage.name = "Server:[" + Utils.getIPAddress(true)
+				final SystemMessage systemMessage = new SystemMessage();
+				systemMessage.name = "Server:[" + Utils.getIPAddress(true)
 						+ ":" + Network.port + "]";
-				sysMessage.setText(chatConnection.name + " disconnected.");
-				getServer().sendToAllTCP(sysMessage);
+				systemMessage.setText(chatConnection.name + " disconnected.");
+				systemMessage.setServerRelayed();
+				
+				getServer().sendToAllTCP(systemMessage);
 				
 				updateNames();
 			}
@@ -146,7 +153,7 @@ public class ChatServer extends ChatService {
 			= "Server:[" + Utils.getIPAddress(true) + ":" + Network.port + "]";
 	
 	private boolean isHistoryRequest(SystemMessage sourceSMessage) {
-		return sourceSMessage.getIsHistoryRequest();
+		return sourceSMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest);
 	}
 	
 	private void sendHistory(int connectionId) {

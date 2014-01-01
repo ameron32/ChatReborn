@@ -43,29 +43,31 @@ public class Global {
 		public static String hostname = "localhost";
 
 		public static String[] groupUsers = { "" };
-		private static final TreeMap<Long, MessageClass> clientChatHistory = new TreeMap<Long, MessageClass>();
+		
+//		private static final TreeMap<Long, MessageClass> clientChatHistory = new TreeMap<Long, MessageClass>();
 
-		public static TreeMap<Long, MessageClass> getClientChatHistory() {
-			return clientChatHistory;
+		public static TreeMap<Long, MessageClass> getFilteredClientChatHistory() {
+			return clientChatHistory.getFilteredHistory();
 		}
 
-		private static final TreeMap<Long, MessageClass> clientChatHistoryFiltered = new TreeMap<Long, MessageClass>();
+//		private static final TreeMap<Long, MessageClass> clientChatHistoryFiltered = new TreeMap<Long, MessageClass>();
 
+		public static ChatHistory clientChatHistory = new ChatHistory();
+		
 		public static void addToHistory(TreeMap<Long, MessageClass> additions) {
-			clientChatHistory.putAll(additions);
+			clientChatHistory.addToHistory(additions);
 		}
 
 		public static void addToHistory(MessageClass mc) {
-			clientChatHistory.put(mc.getTimeStamp(), mc);
+			clientChatHistory.addToHistory(mc);
 		}
 
 		public static void unpackServerHistory(TreeMap<Long, MessageClass> historyBundle) {
-			clientChatHistory.clear();
-			addToHistory(historyBundle);
+			clientChatHistory.unpackServerHistory(historyBundle);
 		}
 
 		public static void clearChatHistory() {
-			clientChatHistory.clear();
+			clientChatHistory.clearChatHistory();
 		}
 	}
 	

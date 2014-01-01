@@ -234,7 +234,7 @@ public class SendBar extends RelativeLayout {
 	
 	private void resetEditText() {
 		etMessage.setText("");
-		etMessage.requestFocus();
+//		etMessage.requestFocus();
 	}
 	
 	public class SendTask extends AsyncTask<String, Integer, String> {

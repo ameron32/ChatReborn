@@ -52,7 +52,8 @@ public class MessageTemplates {
 		private long clientReceivedTimeStamp; // time when YOUR client received the message
 		private String text; // message text
 
-		private TreeSet<MessageTag> tags; // like evernote tags, primarily intended for user-filtering and/or search
+		private final TreeSet<MessageTag> tags = new TreeSet<MessageTag>(); 
+			// like evernote tags, primarily intended for user-filtering and/or search
 		
 		
 		// CONSTRUCTOR
@@ -111,13 +112,13 @@ public class MessageTemplates {
 	}
 	
 	static public class SystemMessage extends MessageClass {
-		private boolean isHistoryRequest = false;
-		public void setIsHistoryRequest(boolean b) {
-			isHistoryRequest = b;
-		}
-		public boolean getIsHistoryRequest() {
-			return isHistoryRequest;
-		}
+//		private boolean isHistoryRequest = false;
+//		public void setIsHistoryRequest(boolean b) {
+//			isHistoryRequest = b;
+//		}
+//		public boolean getIsHistoryRequest() {
+//			return isHistoryRequest;
+//		}
 	}
 	
 	static public class ServerChatHistory extends NamedClass {
