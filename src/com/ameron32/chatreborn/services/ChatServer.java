@@ -51,6 +51,8 @@ public class ChatServer extends ChatService {
 			if (message.length() == 0)
 				return;
 			
+			systemMessage.setServerRelayed();
+			
 			if (systemMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest)) {
 				sendHistory(chatConnection.getID());
 				
@@ -59,6 +61,7 @@ public class ChatServer extends ChatService {
 				historyRequestPlaceholder.name = name;
 				historyRequestPlaceholder.setText(name + ": requested server chat history");
 				historyRequestPlaceholder.attachTags(MessageTag.ServerChatter);
+				historyRequestPlaceholder.setServerRelayed();
 				Global.Server.addToHistory(historyRequestPlaceholder);
 				// do not store the original ChatHistory requests. OMG break everything!
 				return;

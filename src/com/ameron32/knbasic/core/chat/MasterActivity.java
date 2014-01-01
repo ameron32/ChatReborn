@@ -659,13 +659,41 @@ public class MasterActivity
 		}
 	}
 	
+	private void termClient() {
+		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
+		stSendBar.setConnected(false);
+		stSendBar.setSendListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+		stSendBar.setIsTypingListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+		stSendBar.setIsNotTypingListener(new Runnable() {
+			@Override
+			public void run() {
+				showMessage("Client Not Connected", true);
+			}
+		});
+		
+		//stopClientFragment
+//		FragmentTransaction ftClient = fm.beginTransaction();
+//		ftClient.remove(cFragment);
+//		ftClient.commit();
+	}
+
 	private void termServer() {
 		
 		
 		// stopServerFragment
-		FragmentTransaction ftServer = fm.beginTransaction();
-		ftServer.remove(sFragment);
-		ftServer.commit();
+//		FragmentTransaction ftServer = fm.beginTransaction();
+//		ftServer.remove(sFragment);
+//		ftServer.commit();
 	}
 
 	private void startClient(final String host) {
@@ -711,33 +739,6 @@ public class MasterActivity
 		return chatClientService;
 	}
 	
-	private void termClient() {
-		final SendBar stSendBar = (SendBar) findViewById(R.id.stSendBar);
-		stSendBar.setConnected(false);
-		stSendBar.setSendListener(new Runnable() {
-			@Override
-			public void run() {
-				showMessage("Client Not Connected", true);
-			}
-		});
-		stSendBar.setIsTypingListener(new Runnable() {
-			@Override
-			public void run() {
-				showMessage("Client Not Connected", true);
-			}
-		});
-		stSendBar.setIsNotTypingListener(new Runnable() {
-			@Override
-			public void run() {
-				showMessage("Client Not Connected", true);
-			}
-		});
-		
-		//stopClientFragment
-		FragmentTransaction ftClient = fm.beginTransaction();
-		ftClient.remove(cFragment);
-		ftClient.commit();
-	}
 
 	
 	private InternalNotification iNotify;
