@@ -1,29 +1,39 @@
 package com.ameron32.chatreborn.chat;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import android.util.Log;
 
 import com.ameron32.chatreborn.chat.MessageTemplates.MessageClass;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
 
 public class ChatHistory {
 
-	private final TreeMap<Long, MessageClass> completeHistory = new TreeMap<Long, MessageClass>();
-	private final TreeMap<Long, MessageClass> filteredHistory = new TreeMap<Long, MessageClass>();
+	private final TreeMap<Long, MessageClass> completeHistoryCore = new TreeMap<Long, MessageClass>();
+	private final TreeMap<Long, MessageClass> filteredHistoryCore = new TreeMap<Long, MessageClass>();
+	
+	private final Map<Long, MessageClass> completeHistory;
+	private final Map<Long, MessageClass> filteredHistory;
 	
 	public ChatHistory() {
-//		filterTags.add(MessageTag.ServerChatter);
+		completeHistory = Collections.synchronizedMap(completeHistoryCore);
+		filteredHistory = Collections.synchronizedMap(filteredHistoryCore);
+		// filterTags.add(MessageTag.ServerChatter);
 	}
 	
 	public void addToHistory(MessageClass mc) {
+		Log.d("ChatHistory", mc.toString());//
 		completeHistory.put(mc.getTimeStamp(), mc);
 		addToFilteredHistory(mc);
 	}
 	
 	public void addToHistory(TreeMap<Long, MessageClass> additions) {
 		for (Long key : additions.keySet()) {
-			addToHistory(completeHistory.get(key));
+			addToHistory(additions.get(key));
 		}
 	}
 	
@@ -52,7 +62,7 @@ public class ChatHistory {
 		return true;
 	}
 	
-	private void addToFilteredHistory(TreeMap<Long, MessageClass> additions) {
+	private void addToFilteredHistory(Map<Long, MessageClass> additions) {
 		for (Long key : additions.keySet()) {
 			addToFilteredHistory(additions.get(key));
 		}
@@ -73,11 +83,11 @@ public class ChatHistory {
 
 	
 	// GETTERS / SETTERS
-	public TreeMap<Long, MessageClass> getCompleteHistory() {
+	public Map<Long, MessageClass> getCompleteHistory() {
 		return completeHistory;
 	}
 
-	public TreeMap<Long, MessageClass> getFilteredHistory() {
+	public Map<Long, MessageClass> getFilteredHistory() {
 		return filteredHistory;
 	}
 }

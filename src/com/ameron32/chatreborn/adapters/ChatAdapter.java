@@ -3,6 +3,7 @@ package com.ameron32.chatreborn.adapters;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
@@ -29,9 +30,9 @@ public class ChatAdapter extends BaseAdapter {
 	private final Context context;
     ViewHolder holder;
 
-    private TreeMap<Long, MessageClass> mData;
+    private Map<Long, MessageClass> mData;
 
-	public ChatAdapter(Context context, TreeMap<Long, MessageClass> data) {
+	public ChatAdapter(Context context, Map<Long, MessageClass> data) {
     	super();
         this.context = context;
         mData = data;
@@ -51,7 +52,7 @@ public class ChatAdapter extends BaseAdapter {
     
     private long getKeyAt(int position) {
     	int counter = 0;
-    	for (TreeMap.Entry<Long, MessageClass> entry : mData.entrySet()) {
+    	for (Map.Entry<Long, MessageClass> entry : mData.entrySet()) {
     		if (position == counter) return entry.getKey();
     		counter++;
     	}

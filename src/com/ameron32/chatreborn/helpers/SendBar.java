@@ -9,6 +9,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.graphics.drawable.shapes.Shape;
+import android.inputmethodservice.Keyboard.Key;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -136,7 +137,7 @@ public class SendBar extends RelativeLayout {
 					appendToEditText(voiceresults.get(0));
 				}
 				tvd("onResults");
-			}
+			}//
 			
 			@Override
 			public void onReadyForSpeech(Bundle params) {
@@ -172,7 +173,6 @@ public class SendBar extends RelativeLayout {
 
 		});
 		voice.setOnTouchListener(new View.OnTouchListener() {
-
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				// TODO Auto-generated method stub
@@ -276,6 +276,22 @@ public class SendBar extends RelativeLayout {
 					SendTask sendTask = new SendTask(sendListener, true);
 					sendTask.execute();
 					return true;
+				}
+				// voice
+				
+				switch (event.getAction()) {
+				case KeyEvent.ACTION_DOWN:
+					if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+						sr.startListening(RecognizerIntent
+								.getVoiceDetailsIntent(context
+										.getApplicationContext()));
+					}
+					break;
+				case KeyEvent.ACTION_UP:
+					if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+						sr.stopListening();
+					}
+					break;
 				}
 				return false;
 			}

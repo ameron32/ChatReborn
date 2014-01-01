@@ -51,7 +51,7 @@ public class ChatServer extends ChatService {
 			if (message.length() == 0)
 				return;
 			
-			systemMessage.setServerRelayed();
+			systemMessage.setServerRelayed();//
 			
 			if (systemMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest)) {
 				sendHistory(chatConnection.getID());
@@ -113,7 +113,8 @@ public class ChatServer extends ChatService {
 			systemMessage.name = serverName;
 			systemMessage.setServerRelayed();
 			systemMessage.setText(name + " connected.");
-
+			systemMessage.attachTags(MessageTag.ServerUpdate);
+			Global.Server.addToHistory(systemMessage);
 			getServer().sendToAllTCP(systemMessage);
 			
 			updateNames();
@@ -128,8 +129,9 @@ public class ChatServer extends ChatService {
 				systemMessage.name = "Server:[" + Utils.getIPAddress(true)
 						+ ":" + Network.port + "]";
 				systemMessage.setText(chatConnection.name + " disconnected.");
+				systemMessage.attachTags(MessageTag.ServerUpdate);
 				systemMessage.setServerRelayed();
-				
+				Global.Server.addToHistory(systemMessage);
 				getServer().sendToAllTCP(systemMessage);
 				
 				updateNames();

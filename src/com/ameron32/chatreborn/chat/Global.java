@@ -1,6 +1,7 @@
 package com.ameron32.chatreborn.chat;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import com.ameron32.chatreborn.chat.MessageTemplates.MessageClass;
@@ -46,7 +47,7 @@ public class Global {
 		
 //		private static final TreeMap<Long, MessageClass> clientChatHistory = new TreeMap<Long, MessageClass>();
 
-		public static TreeMap<Long, MessageClass> getFilteredClientChatHistory() {
+		public static Map<Long, MessageClass> getFilteredClientChatHistory() {
 			return clientChatHistory.getFilteredHistory();
 		}
 
