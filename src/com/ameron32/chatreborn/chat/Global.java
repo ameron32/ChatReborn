@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.ameron32.chatreborn.chat.MessageTemplates.MessageClass;
+import com.ameron32.chatreborn.chat.MessageTemplates.MessageBase;
 
 public class Global {
 	/**
@@ -21,13 +21,13 @@ public class Global {
 	}
 	
 	public static class Server {
-		private static final TreeMap<Long, MessageClass> serverChatHistory 
-			= new TreeMap<Long, MessageClass>();
-		public static void addToHistory(MessageClass mc) {
+		private static final TreeMap<Long, MessageBase> serverChatHistory 
+			= new TreeMap<Long, MessageBase>();
+		public static void addToHistory(MessageBase mc) {
 			serverChatHistory.put(mc.getTimeStamp(), mc);
 		}
-		public static TreeMap<Long, MessageClass> getServerChatHistory() {
-			return new TreeMap<Long, MessageClass>(serverChatHistory);
+		public static TreeMap<Long, MessageBase> getServerChatHistory() {
+			return new TreeMap<Long, MessageBase>(serverChatHistory);
 		}
 		public static final ArrayList<String> connectedUsers 
 			= new ArrayList<String>();
@@ -47,7 +47,7 @@ public class Global {
 		
 //		private static final TreeMap<Long, MessageClass> clientChatHistory = new TreeMap<Long, MessageClass>();
 
-		public static Map<Long, MessageClass> getFilteredClientChatHistory() {
+		public static Map<Long, MessageBase> getFilteredClientChatHistory() {
 			return clientChatHistory.getFilteredHistory();
 		}
 
@@ -55,15 +55,15 @@ public class Global {
 
 		public static ChatHistory clientChatHistory = new ChatHistory();
 		
-		public static void addToHistory(TreeMap<Long, MessageClass> additions) {
+		public static void addToHistory(TreeMap<Long, MessageBase> additions) {
 			clientChatHistory.addToHistory(additions);
 		}
 
-		public static void addToHistory(MessageClass mc) {
+		public static void addToHistory(MessageBase mc) {
 			clientChatHistory.addToHistory(mc);
 		}
 
-		public static void unpackServerHistory(TreeMap<Long, MessageClass> historyBundle) {
+		public static void unpackServerHistory(TreeMap<Long, MessageBase> historyBundle) {
 			clientChatHistory.unpackServerHistory(historyBundle);
 		}
 

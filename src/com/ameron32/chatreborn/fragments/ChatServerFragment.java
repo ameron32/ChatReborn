@@ -1,9 +1,9 @@
 package com.ameron32.chatreborn.fragments;
 
 import com.ameron32.knbasic.core.chat.R;
-import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
+import com.ameron32.chatreborn.frmwk.ChatListener;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
 import com.ameron32.chatreborn.services.ChatClient;

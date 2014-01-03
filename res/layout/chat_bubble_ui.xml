@@ -4,15 +4,19 @@
     android:id="@+id/flMessageBorder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="2dp"
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
+    android:layout_marginTop="2dp"
     android:background="#CCCCCC"
     android:minHeight="10dp" >
 
     <RelativeLayout
         android:id="@+id/back"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginTop="2dp"
         android:background="#000000"
         android:minHeight="50dp"
         android:tag="back" >
@@ -49,48 +53,62 @@
             android:layout_marginRight="4dp"
             android:layout_toRightOf="@+id/bHideChat"
             android:text="Delete" />
-        
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/front"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginTop="2dp"
         android:background="#FFFFFF"
         android:minHeight="50dp"
         android:tag="front" >
 
-        <TextView
-            android:id="@+id/tvTimeStamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:text="00:00:00"
-            android:textColor="#28AA30" />
-
-        <TextView
-            android:id="@+id/tvUsr"
+        <RelativeLayout
+            android:id="@+id/rlQuickBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:text="User"
-            android:textColor="#28AA30" />
+            android:layout_marginRight="2dp"
+            android:minWidth="64dp" >
+
+            <ImageView
+                android:id="@+id/quickContactBadge1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/gp" />
+
+            <TextView
+                android:id="@+id/tvTimeStamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/quickContactBadge1"
+                android:layout_centerHorizontal="true"
+                android:text="00:00:00"
+                android:textColor="#28AA30"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tvUsr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:text="User"
+                android:textColor="#28AA30" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/tvMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/tvUsr"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/rlQuickBadge"
             android:text="Message" />
     </RelativeLayout>
 

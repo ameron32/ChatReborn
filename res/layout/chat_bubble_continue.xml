@@ -1,38 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/flMessageBorder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:background="#CCCCCC" >
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
+    android:background="#CCCCCC"
+    android:minHeight="10dp" >
 
     <RelativeLayout
+        android:id="@+id/back"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:background="#FFFFFF" >
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:background="#000000"
+        android:minHeight="32dp"
+        android:tag="back" >
 
-        <TextView
-            android:id="@+id/tvTimeStampC"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:text="00:00:00"
-            android:textColor="#28AA30" />
-
-        <TextView
-            android:id="@+id/tvMsgC"
+        <Button
+            android:id="@+id/bEditChat"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/tvTimeStampC"
+            android:layout_alignParentTop="true"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
+            android:text="Edit" />
+
+        <Button
+            android:id="@+id/bHideChat"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_toRightOf="@+id/bEditChat"
+            android:text="Hide" />
+
+        <Button
+            android:id="@+id/bDeleteChat"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_toRightOf="@+id/bHideChat"
+            android:text="Delete" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/front"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+        android:background="#FFFFFF"
+        android:minHeight="32dp"
+        android:tag="front" >
+
+        <RelativeLayout
+            android:id="@+id/rlQuickBadge"
+            android:layout_width="wrap_content"
+            android:minWidth="64dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="2dp" >
+
+            <TextView
+                android:id="@+id/tvTimeStamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="00:00:00"
+                android:textColor="#28AA30"
+                android:textSize="11sp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tvMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/rlQuickBadge"
             android:text="Message" />
     </RelativeLayout>
 
-</RelativeLayout>
+</FrameLayout>

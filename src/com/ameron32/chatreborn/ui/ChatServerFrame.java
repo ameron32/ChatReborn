@@ -58,12 +58,12 @@ public class ChatServerFrame {
 		});
 	}
 	
-	public void addMessage(final MessageClass m) {
+	public void addMessage(final MessageBase m) {
 		addMessage(m.name, m.getText(), m.getTimeStamp(), m);
 	}
 
 	public void addMessage(final String username, final String chatMessage,
-			final long serverTimeStamp, final MessageClass m) {
+			final long serverTimeStamp, final MessageBase m) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

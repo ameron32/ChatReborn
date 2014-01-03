@@ -3,10 +3,10 @@ package com.ameron32.chatreborn.services;
 import android.content.Intent;
 import android.os.IBinder;
 
-import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
+import com.ameron32.chatreborn.frmwk.ChatListener;
 import com.ameron32.chatreborn.frmwk.ChatService;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
 import com.esotericsoftware.kryonet.Client;
@@ -43,7 +43,8 @@ public class ChatClient extends ChatService {
 		
 		@Override
 		protected void received(final ServerChatHistory serverChatHistory, final ChatConnection chatConnection) {
-			Global.Local.unpackServerHistory(serverChatHistory.getHistoryBundle());
+			super.received(serverChatHistory, chatConnection);
+		  Global.Local.unpackServerHistory(serverChatHistory.getHistoryBundle());
 		}
 		
 		@Override

@@ -14,9 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
+import com.ameron32.chatreborn.frmwk.ChatListener;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
 import com.ameron32.chatreborn.services.ChatClient;
@@ -28,8 +28,6 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 
 public class ChatClientFragment extends Fragment {
-	
-//	private View v;
 	
 	// ----------------------------------------
 	// LIFECYCLE CODE
@@ -172,7 +170,7 @@ public class ChatClientFragment extends Fragment {
 		sendMessage(systemMessage);
 	}
 	
-	public void sendMessage(final MessageClass mc) {
+	public void sendMessage(final MessageBase mc) {
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {

@@ -4,6 +4,6 @@
     <string name="app_name">KNBasic</string>
     <string name="menu_settings">Settings</string>
     <string name="hello_world">Hello world</string>
-    <string name="menu_exit">Exit</string><string name="version_number">1.6.0</string>
+    <string name="menu_exit">Exit</string><string name="version_number">1.7.0</string>
     
 </resources>

@@ -17,7 +17,7 @@ public class NetworkThreadPoolExecutor extends ThreadPoolExecutor {
 		this(1, 5, 1, TimeUnit.MILLISECONDS, networkQueue);
 	}
 	
-	public NetworkThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+	private NetworkThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
 	}

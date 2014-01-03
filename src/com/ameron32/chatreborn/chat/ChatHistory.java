@@ -8,16 +8,16 @@ import java.util.TreeSet;
 
 import android.util.Log;
 
-import com.ameron32.chatreborn.chat.MessageTemplates.MessageClass;
+import com.ameron32.chatreborn.chat.MessageTemplates.MessageBase;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
 
 public class ChatHistory {
 
-	private final TreeMap<Long, MessageClass> completeHistoryCore = new TreeMap<Long, MessageClass>();
-	private final TreeMap<Long, MessageClass> filteredHistoryCore = new TreeMap<Long, MessageClass>();
+	private final TreeMap<Long, MessageBase> completeHistoryCore = new TreeMap<Long, MessageBase>();
+	private final TreeMap<Long, MessageBase> filteredHistoryCore = new TreeMap<Long, MessageBase>();
 	
-	private final Map<Long, MessageClass> completeHistory;
-	private final Map<Long, MessageClass> filteredHistory;
+	private final Map<Long, MessageBase> completeHistory;
+	private final Map<Long, MessageBase> filteredHistory;
 	
 	public ChatHistory() {
 		completeHistory = Collections.synchronizedMap(completeHistoryCore);
@@ -25,19 +25,19 @@ public class ChatHistory {
 		// filterTags.add(MessageTag.ServerChatter);
 	}
 	
-	public void addToHistory(MessageClass mc) {
+	public void addToHistory(MessageBase mc) {
 		Log.d("ChatHistory", mc.toString());//
 		completeHistory.put(mc.getTimeStamp(), mc);
 		addToFilteredHistory(mc);
 	}
 	
-	public void addToHistory(TreeMap<Long, MessageClass> additions) {
+	public void addToHistory(TreeMap<Long, MessageBase> additions) {
 		for (Long key : additions.keySet()) {
 			addToHistory(additions.get(key));
 		}
 	}
 	
-	public void unpackServerHistory(TreeMap<Long, MessageClass> historyBundle) {
+	public void unpackServerHistory(TreeMap<Long, MessageBase> historyBundle) {
 		clearChatHistory();
 		addToHistory(historyBundle);
 	}
@@ -54,7 +54,7 @@ public class ChatHistory {
 	// FILTER METHODS
 	TreeSet<MessageTag> filterTags = new TreeSet<MessageTag>();
 	
-	private boolean addToFilteredHistory(MessageClass mc) {
+	private boolean addToFilteredHistory(MessageBase mc) {
 		if (mc.hasAnyOfTags(filterTags.toArray(new MessageTag[0]))) {
 			return false;
 		}
@@ -62,7 +62,7 @@ public class ChatHistory {
 		return true;
 	}
 	
-	private void addToFilteredHistory(Map<Long, MessageClass> additions) {
+	private void addToFilteredHistory(Map<Long, MessageBase> additions) {
 		for (Long key : additions.keySet()) {
 			addToFilteredHistory(additions.get(key));
 		}
@@ -83,11 +83,11 @@ public class ChatHistory {
 
 	
 	// GETTERS / SETTERS
-	public Map<Long, MessageClass> getCompleteHistory() {
+	public Map<Long, MessageBase> getCompleteHistory() {
 		return completeHistory;
 	}
 
-	public Map<Long, MessageClass> getFilteredHistory() {
+	public Map<Long, MessageBase> getFilteredHistory() {
 		return filteredHistory;
 	}
 }

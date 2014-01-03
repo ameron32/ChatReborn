@@ -20,7 +20,7 @@ public class MessageTemplates {
 	}
 
 	
-	static public class NamedClass {
+	static public class NamedBase {
 		public String name;
 
 		@Override
@@ -29,11 +29,11 @@ public class MessageTemplates {
 		}
 	}
 	
-	static public class RegisterName extends NamedClass {
+	static public class RegisterName extends NamedBase {
 
 	}
 	
-	static public class MessageClass extends NamedClass {
+	static public class MessageBase extends NamedBase {
 
 		// FEATURES OF ALL MESSAGES
 		private short revision;		  // newest revision displayed automatically by adapter.
@@ -57,7 +57,7 @@ public class MessageTemplates {
 		
 		
 		// CONSTRUCTOR
-		public MessageClass() {  
+		public MessageBase() {  
 			setOriginatingTimeStamp();
 		}
 		
@@ -93,25 +93,30 @@ public class MessageTemplates {
 		public String toString() {  return super.toString() + ":Message=" + text;  }
 	}
 	
-	static public class ChatMessage extends MessageClass {
+	static public class ChatMessage extends MessageBase {
 		// FEATURES OF CHAT-MESSAGES
+	  String character; // character "tag"
 		ArrayList<CommentMessage> comments; // like Google Docs comments, optionally attached to each message
+		
+		public void setCharacter(String character) {
+		  this.character = character;
+		}
 	}
 	
-	class PrivateChatMessage extends ChatMessage {
+	static public class PrivateChatMessage extends ChatMessage {
 		String targetName; // name of client to whom message is intended
-	
+		
 	}
 	
-	class CommentMessage extends MessageClass { // attach to Chat-Message
+	static public class CommentMessage extends MessageBase { // attach to Chat-Message
 		long attachToKeyId; // same number as keyId from messageClass
-		public CommentMessage(MessageClass mc) {
+		public CommentMessage(MessageBase mc) {
 			this.attachToKeyId = mc.keyId;
 		}
 		
 	}
 	
-	static public class SystemMessage extends MessageClass {
+	static public class SystemMessage extends MessageBase {
 //		private boolean isHistoryRequest = false;
 //		public void setIsHistoryRequest(boolean b) {
 //			isHistoryRequest = b;
@@ -121,8 +126,9 @@ public class MessageTemplates {
 //		}
 	}
 	
-	static public class ServerChatHistory extends NamedClass {
+	static public class ServerChatHistory extends NamedBase {
 		private long serverTimeStamp;
+		private int part; private int totalParts;
 		public ServerChatHistory() {
 			setTime();
 		}
@@ -134,18 +140,34 @@ public class MessageTemplates {
 		}
 		
 		// History
-		private final TreeMap<Long, MessageClass> chatHistoryBundle 
-				= new TreeMap<Long, MessageClass>();
-		public void loadHistory(TreeMap<Long, MessageClass> history) {
+		private final TreeMap<Long, MessageBase> chatHistoryBundle 
+				= new TreeMap<Long, MessageBase>();
+		public void loadHistory(TreeMap<Long, MessageBase> history) {
 			Long[] keySet = history.keySet().toArray(new Long[0]);
 			for (int i = 0; i < history.size(); i++) {
 				long key = keySet[i];
 				chatHistoryBundle.put(key, history.get(key));
 			}
 		}
-		public TreeMap<Long, MessageClass> getHistoryBundle() {
+		public TreeMap<Long, MessageBase> getHistoryBundle() {
 			return chatHistoryBundle;
 		}
+    public int getPart() {
+      return part;
+    }
+    private void setPart(int part) {
+      this.part = part;
+    }
+    public int getTotalParts() {
+      return totalParts;
+    }
+    private void setTotalParts(int totalParts) {
+      this.totalParts = totalParts;
+    }
+    public void setPartOfTotalParts(int part, int totalParts) {
+      setPart(part);
+      setTotalParts(totalParts);
+    }
 	}
 	
 	

@@ -16,16 +16,16 @@
         android:id="@+id/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/ivCharacter"
         android:layout_toLeftOf="@+id/send_button"
-        android:layout_alignParentLeft="true"
+        android:layout_toRightOf="@+id/ivCharacter"
         android:ems="10"
-        android:imeOptions="actionSend"
         android:hint="Message"
-        android:textSize="12dp"
-        android:maxHeight="200dp" />
-    
-	<ImageButton
+        android:imeOptions="actionSend"
+        android:maxHeight="200dp"
+        android:textSize="12dp" />
+
+    <ImageButton
         android:id="@+id/clear_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,22 +33,22 @@
         android:layout_toLeftOf="@+id/mic_button"
         android:background="@null"
         android:src="@drawable/canceldark" />
-    
+
     <ImageButton
         android:id="@+id/mic_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/send_button"
         android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/send_button"
         android:background="@null"
         android:src="@drawable/micdark" />
-    
+
     <ImageView
         android:id="@+id/mic_sound_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/send_button"
         android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/send_button"
         android:background="@null"
         android:src="@drawable/mic_sound_view" />
 
@@ -58,7 +58,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/clear_text"
-        android:textSize="11dp"
-        android:text="debug" />
+        android:text="debug"
+        android:textSize="11dp" />
+
+    <ImageView
+        android:id="@+id/ivCharacter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/gp" />
 
 </RelativeLayout>

@@ -43,8 +43,8 @@ public class NetworkTask extends AsyncTask<String, int[], String> {
 		this.task = task;
 	}
 	
-	private MessageClass msg;
-	public NetworkTask (Task task, ChatClient chatClient, MessageClass msg) {
+	private MessageBase msg;
+	public NetworkTask (Task task, ChatClient chatClient, MessageBase msg) {
 		this.chatClient = chatClient;
 		this.client = chatClient.getClient();
 		this.task = task;

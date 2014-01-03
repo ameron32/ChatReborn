@@ -7,11 +7,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
 
-import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
+import com.ameron32.chatreborn.chat.MessageTemplates.MessageBase;
 import com.ameron32.chatreborn.chat.Network;
 import com.ameron32.chatreborn.chat.Utils;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
+import com.ameron32.chatreborn.frmwk.ChatListener;
 import com.ameron32.chatreborn.frmwk.ChatService;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Server;
@@ -157,16 +158,27 @@ public class ChatServer extends ChatService {
 	private static final String serverName
 			= "Server:[" + Utils.getIPAddress(true) + ":" + Network.port + "]";
 	
-	private boolean isHistoryRequest(SystemMessage sourceSMessage) {
-		return sourceSMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest);
-	}
+//	private boolean isHistoryRequest(SystemMessage sourceSMessage) {
+//		return sourceSMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest);
+//	}
 	
 	private void sendHistory(int connectionId) {
-		TreeMap<Long, MessageClass> sch = Global.Server.getServerChatHistory();
-		ServerChatHistory schB = new ServerChatHistory();
-		schB.name = serverName;
-		schB.loadHistory(sch);
-		getServer().sendToTCP(connectionId, schB);
+//	  final TreeMap<Long, MessageBase> gSCH = Global.Server.getServerChatHistory();
+//	  int messagesPerPacket = 5;
+//	  int length = gSCH.size();
+//	  int lastBatch = length % messagesPerPacket;
+//		int numberOfPackets = (length / messagesPerPacket) + ((lastBatch == 0) ? 0 : 1);
+//		  // add 1 packet if it doesn't fit perfectly
+//		
+//		// send batches of ServerChatHistories
+//		for (int i = 0; i < numberOfPackets; i++) {
+		  TreeMap<Long, MessageBase> sch = Global.Server.getServerChatHistory();
+		  ServerChatHistory schB = new ServerChatHistory();
+	    schB.name = serverName;
+//	    schB.setPartOfTotalParts(i, numberOfPackets);
+	    schB.loadHistory(sch);
+	    getServer().sendToTCP(connectionId, schB);
+//		}
 	}
 
 	// --------------------------------------

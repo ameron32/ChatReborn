@@ -7,9 +7,9 @@
         android:top="0dp" />
 
     <size
-        android:height="32dp"
-        android:width="32dp" />
+        android:height="48dp"
+        android:width="48dp" />
 
-    <solid android:color="#CC0000" />
+    <solid android:color="#66CC0000" />
 
 </shape>

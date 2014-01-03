@@ -83,23 +83,12 @@
     </RelativeLayout>
     
     <com.ameron32.knbasic.core.helpers.InternalNotification
-                android:id="@+id/iNotify"
+        android:id="@+id/iNotify"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/llNotifications"
         android:layout_alignParentLeft="true"
         android:layout_margin="25dp" />
-<!-- 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/stSendBar"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="25dp" >
-
-        <include layout="@layout/chat_notification_overlay" />
-    </RelativeLayout>
--->
 
     <LinearLayout
         android:id="@+id/llNotifications"

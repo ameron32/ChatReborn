@@ -30,9 +30,9 @@ public class ChatAdapter extends BaseAdapter {
 	private final Context context;
     ViewHolder holder;
 
-    private Map<Long, MessageClass> mData;
+    private Map<Long, MessageBase> mData;
 
-	public ChatAdapter(Context context, Map<Long, MessageClass> data) {
+	public ChatAdapter(Context context, Map<Long, MessageBase> data) {
     	super();
         this.context = context;
         mData = data;
@@ -42,7 +42,7 @@ public class ChatAdapter extends BaseAdapter {
         return mData.size();
     }
 
-    public MessageClass getItem(int position) {
+    public MessageBase getItem(int position) {
     	return mData.get(getKeyAt(position));
     }
 
@@ -52,7 +52,7 @@ public class ChatAdapter extends BaseAdapter {
     
     private long getKeyAt(int position) {
     	int counter = 0;
-    	for (Map.Entry<Long, MessageClass> entry : mData.entrySet()) {
+    	for (Map.Entry<Long, MessageBase> entry : mData.entrySet()) {
     		if (position == counter) return entry.getKey();
     		counter++;
     	}
@@ -61,7 +61,7 @@ public class ChatAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
-    	final MessageClass item = getItem(position);
+    	final MessageBase item = getItem(position);
 		if (item instanceof SystemMessage) {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -76,18 +76,45 @@ public class ChatAdapter extends BaseAdapter {
 			convertView.setTag(holder);
 		}
 		if (item instanceof ChatMessage) {
-			LayoutInflater inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.chat_bubble_ui, parent,
-					false);
-			holder = new ViewHolder();
-			holder.tvTime = (TextView) convertView
-					.findViewById(R.id.tvTimeStamp);
-			holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr);
-			holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
+			// check for continued message
+			boolean useDefaultInflater = true;
+			if (position != 0) {
+				final MessageBase previousItem = getItem(position - 1);
+				if (previousItem instanceof ChatMessage
+						&& previousItem.name.equals(item.name)) {
 
-			convertView.setTag(holder);
+					LayoutInflater inflater = (LayoutInflater) context
+							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convertView = inflater.inflate(
+							R.layout.chat_bubble_continue, parent, false);
+					holder = new ViewHolder();
+					holder.tvTime = (TextView) convertView
+							.findViewById(R.id.tvTimeStamp);
+					// holder.tvUsr = (TextView)
+					// convertView.findViewById(R.id.tvUsr);
+					holder.tvMsg = (TextView) convertView
+							.findViewById(R.id.tvMsg);
+
+					convertView.setTag(holder);
+					useDefaultInflater = false;
+				}
+			}
+
+			if (useDefaultInflater) {
+				LayoutInflater inflater = (LayoutInflater) context
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = inflater.inflate(R.layout.chat_bubble_ui, parent,
+						false);
+				holder = new ViewHolder();
+				holder.tvTime = (TextView) convertView
+						.findViewById(R.id.tvTimeStamp);
+				holder.tvUsr = (TextView) convertView.findViewById(R.id.tvUsr);
+				holder.tvMsg = (TextView) convertView.findViewById(R.id.tvMsg);
+
+				convertView.setTag(holder);
+			}
 		}
+    
 		
 		// both share slide rear
 		holder.bEdit = (Button) convertView.findViewById(R.id.bEditChat);
@@ -112,7 +139,7 @@ public class ChatAdapter extends BaseAdapter {
 		Long timeStamp = item.getTimeStamp();
 		holder.tvTime.setText(new SimpleDateFormat("h:mma", Locale.US)
 				.format(timeStamp));
-		holder.tvUsr.setText(item.name);
+		if (holder.tvUsr != null) holder.tvUsr.setText(item.name);
 		holder.tvMsg.setText(item.getText());
 		
         return convertView;
@@ -129,7 +156,7 @@ public class ChatAdapter extends BaseAdapter {
 		mData.clear();
 	}
 	
-	public void addAll(TreeMap<Long, MessageClass> history) {
+	public void addAll(TreeMap<Long, MessageBase> history) {
 		mData.putAll(history);
 	}
 	

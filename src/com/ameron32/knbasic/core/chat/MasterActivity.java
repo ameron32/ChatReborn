@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -36,11 +37,11 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.ameron32.chatreborn.chat.ChatListener;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.fragments.ChatClientFragment;
 import com.ameron32.chatreborn.fragments.ChatServerFragment;
+import com.ameron32.chatreborn.frmwk.ChatListener;
 import com.ameron32.chatreborn.helpers.SendBar;
 import com.ameron32.chatreborn.services.ChatClient;
 import com.ameron32.chatreborn.services.ChatServer;
@@ -127,12 +128,13 @@ public class MasterActivity
 		if (blockDuplicate(master_key, checkboxId)) return;
 			
 		// Create and attach button to top of settings drawer
-		CheckBox checkbox = ((CheckBox) (LayoutInflater.from(this).inflate(R.layout.settings_checkbox, null)));
+		FrameLayout frame = ((FrameLayout) (LayoutInflater.from(this).inflate(R.layout.settings_checkbox, null)));
+		CheckBox checkbox = ((CheckBox) frame.findViewById(R.id.settings_checkbox));
 			checkbox.setText(title);
-			checkbox.setTag(master_key, checkboxId);
 			checkbox.setOnCheckedChangeListener(checkedListener);
+		frame.setTag(master_key, checkboxId);
 		
-		llSettings.addView(checkbox);
+		llSettings.addView(frame);
 	}
 	
 	private boolean blockDuplicate(int master_key, int viewId) {
