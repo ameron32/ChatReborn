@@ -154,7 +154,7 @@ public class ChatServerFragment extends Fragment {
 		}
 	}
 	
-	final ChatListener chatServerListener2 = new ChatListener() {
+	final ChatListener chatServerListener2 = new ChatListener(false) {
 		@Override
 		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			chatFrame.addMessage(systemMessage);

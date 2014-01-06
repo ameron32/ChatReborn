@@ -42,6 +42,7 @@ import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.fragments.ChatClientFragment;
 import com.ameron32.chatreborn.fragments.ChatServerFragment;
 import com.ameron32.chatreborn.frmwk.ChatListener;
+import com.ameron32.chatreborn.frmwk.PopupListener;
 import com.ameron32.chatreborn.helpers.SendBar;
 import com.ameron32.chatreborn.services.ChatClient;
 import com.ameron32.chatreborn.services.ChatServer;
@@ -809,7 +810,7 @@ public class MasterActivity
 		// ---------------------------
 		
 		
-		ChatListener chatClientListener = new ChatListener() {
+		PopupListener chatClientListener = new PopupListener(true) {
 			@Override
 			protected void connected() {
 				runOnUiThread(new Runnable() {
@@ -840,9 +841,10 @@ public class MasterActivity
 				});
 			}
 		};
+		chatClientListener.enable();
 
-		if (cFragment != null)
-			cFragment.addChatClientListener(chatClientListener);
+//		if (cFragment != null)
+//			cFragment.addChatClientListener(chatClientListener);
 	}
 	
 

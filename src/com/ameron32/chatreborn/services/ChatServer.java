@@ -40,7 +40,7 @@ public class ChatServer extends ChatService {
 		// restore chat log somehow 
 	}
 	
-	private final ChatListener serverListener = new ChatListener() {
+	private final ChatListener serverListener = new ChatListener(false) {
 		@Override
 		protected void received(final SystemMessage systemMessage, final ChatConnection chatConnection) {
 			String message = null;
@@ -52,7 +52,7 @@ public class ChatServer extends ChatService {
 			if (message.length() == 0)
 				return;
 			
-			systemMessage.setServerRelayed();//
+			systemMessage.setServerRelayed();
 			
 			if (systemMessage.hasAnyOfTags(MessageTag.ClientHistoryRequest)) {
 				sendHistory(chatConnection.getID());
@@ -114,7 +114,7 @@ public class ChatServer extends ChatService {
 			systemMessage.name = serverName;
 			systemMessage.setServerRelayed();
 			systemMessage.setText(name + " connected.");
-			systemMessage.attachTags(MessageTag.ServerUpdate);
+			systemMessage.attachTags(MessageTag.ServerUpdate, MessageTag.ClientConnection);
 			Global.Server.addToHistory(systemMessage);
 			getServer().sendToAllTCP(systemMessage);
 			
@@ -130,7 +130,7 @@ public class ChatServer extends ChatService {
 				systemMessage.name = "Server:[" + Utils.getIPAddress(true)
 						+ ":" + Network.port + "]";
 				systemMessage.setText(chatConnection.name + " disconnected.");
-				systemMessage.attachTags(MessageTag.ServerUpdate);
+				systemMessage.attachTags(MessageTag.ServerUpdate, MessageTag.ClientConnection);
 				systemMessage.setServerRelayed();
 				Global.Server.addToHistory(systemMessage);
 				getServer().sendToAllTCP(systemMessage);

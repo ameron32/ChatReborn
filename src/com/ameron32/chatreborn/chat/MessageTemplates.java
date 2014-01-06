@@ -185,7 +185,7 @@ public class MessageTemplates {
 		ClientStatus, // client status updates (related to "away" and "invisible" status)
 		ClientRequestServerStatus, // initiation calling for a ServerStatus
 		ClientDebug, // error/log specific markers. similar to a logcat.
-		ClientConnection, // RegisterName
+		ClientConnection, // RegisterName?, HasConnected/HasDisconnected
 		ClientHistoryRequest, // Request for ServerChatHistory
 		
 		// USER INTERACTION

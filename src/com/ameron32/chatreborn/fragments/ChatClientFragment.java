@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
 import com.ameron32.chatreborn.frmwk.ChatListener;
+import com.ameron32.chatreborn.frmwk.CustomChatListener;
 import com.ameron32.chatreborn.helpers.NetworkTask;
 import com.ameron32.chatreborn.helpers.NetworkTask.Task;
 import com.ameron32.chatreborn.services.ChatClient;
@@ -77,7 +78,7 @@ public class ChatClientFragment extends Fragment {
 	public void bindClientService() {
 		
 		getActivity().bindService(new Intent(getActivity(), ChatClient.class), mConnection, ContextWrapper.BIND_AUTO_CREATE);
-		chatClientListener2.setDisabled(false);
+//		chatClientListener2.setDisabled(false);
 		if (chatFrame == null) 
 			chatFrame = new ChatClientFrame(getActivity(), getView());
 
@@ -92,7 +93,7 @@ public class ChatClientFragment extends Fragment {
 	public void unbindClientService() {
 
 		getActivity().unbindService(mConnection);
-		chatClientListener2.setDisabled(true);
+//		chatClientListener2.setDisabled(true);
 		
 		chatFrame = null;
 	}
@@ -109,17 +110,17 @@ public class ChatClientFragment extends Fragment {
 	// ----------------------------------------
 	// CHATLISTENER HANDLING
 	// ----------------------------------------
-	private final ArrayList<Listener> chatClientListeners = new ArrayList<Listener>();
+//	private final ArrayList<Listener> chatClientListeners = new ArrayList<Listener>();
+//
+//	private void addDefaultListeners() {
+//		addChatClientListener(chatClientListener2);
+//	}
+//
+//	public void addChatClientListener(Listener l) {
+//		chatClientListeners.add(l);
+//	}
 
-	private void addDefaultListeners() {
-		addChatClientListener(chatClientListener2);
-	}
-
-	public void addChatClientListener(Listener l) {
-		chatClientListeners.add(l);
-	}
-
-	private final ChatListener chatClientListener2 = new ChatListener() {
+	private final CustomChatListener chatClientListener2 = new CustomChatListener(true) {
 		@Override
 		protected void received(final UpdateNames updateNames, final ChatConnection chatConnection) {
 			chatFrame.setNames(updateNames.names);
@@ -147,7 +148,6 @@ public class ChatClientFragment extends Fragment {
 		
 		@Override
 		protected void onReceivedComplete(boolean wasChatObjectReceived) {
-//			if (wasChatObjectReceived)
 				refreshChatHistory();
 		}
 	};
@@ -213,12 +213,13 @@ public class ChatClientFragment extends Fragment {
 
 				// TODO surround this with a "isConnected" catch (to prevent
 				// unnecessary restarts of the client)
-				if (!chatClient.getIsConnected() && chatClient.getIsPrepared()) {
-//				if (chatClient.getIsPrepared() && !chatClient.getIsConnected()) {
-					addDefaultListeners();
-					for (Listener l : chatClientListeners) {
-						chatClient.getClient().addListener(l);
-					}
+//				if (!chatClient.getIsConnected() && chatClient.getIsPrepared()) {
+				if (chatClient.getIsPrepared() && !chatClient.getIsConnected()) {
+//					addDefaultListeners();
+//					for (Listener l : chatClientListeners) {
+//						chatClient.getClient().addListener(l);
+//					}
+//				  chatClientListener2.enable();
 
 					initiateConnectionToServer();
 				}
@@ -235,11 +236,11 @@ public class ChatClientFragment extends Fragment {
 				isBound_mConnection = false;
 				chatClient.isBound = false;
 		
-				if (chatClient.getIsConnected()) {
-					for (Listener l : chatClientListeners) {
-						chatClient.getClient().removeListener(l);
-					}
-				}
+//				if (chatClient.getIsConnected()) {
+//					for (Listener l : chatClientListeners) {
+//						chatClient.getClient().removeListener(l);
+//					}
+//				}
 			} else {
 				Toast.makeText(getActivity(), 
 						"chatServer is Null",

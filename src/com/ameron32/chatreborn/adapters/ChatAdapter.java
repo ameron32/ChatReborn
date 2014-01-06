@@ -129,11 +129,13 @@ public class ChatAdapter extends BaseAdapter {
 				a.showMessage("Not yet implemented.");
 			}
 		};
-    	
-		holder.bEdit.setOnClickListener(tmp);
-		holder.bHide.setOnClickListener(tmp);
-		holder.bDelete.setOnClickListener(tmp);
-
+    
+		// cheating to allow SystemMessage to avoid these buttons
+    if (item instanceof ChatMessage) {
+      holder.bEdit.setOnClickListener(tmp);
+      holder.bHide.setOnClickListener(tmp);
+      holder.bDelete.setOnClickListener(tmp);
+    }
 
 
 		Long timeStamp = item.getTimeStamp();

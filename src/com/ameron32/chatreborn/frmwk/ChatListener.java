@@ -1,5 +1,7 @@
 package com.ameron32.chatreborn.frmwk;
 
+import java.util.ArrayList;
+
 import android.util.Log;
 
 import com.ameron32.chatreborn.chat.MessageTemplates.*;
@@ -10,6 +12,8 @@ import com.esotericsoftware.kryonet.Listener;
 
 public abstract class ChatListener extends Listener {
 
+  // STATIC ACCESS TO ALL CHATLISTENERS
+  // -----------------------------------------------------------------
 	private Connection connection;
 	private Object object;
 	
@@ -17,37 +21,78 @@ public abstract class ChatListener extends Listener {
 	public void setConnection(Connection connection) { this.connection = connection; }
 	public Object getObject() { return object; }
 	public void setObject(Object object) { this.object = object; }
-
-	private void init(final Connection connection) {
+	
+	
+	// STATIC ACCESS TO ALL CHATLISTENERS
+	// -----------------------------------------------------------------
+	private static ArrayList<ChatListener> chatListeners = new ArrayList<ChatListener>();
+	public static void setAllDisabled(boolean state) {
+	  for (ChatListener cl : chatListeners) {
+	    cl.setDisabled(state);
+	  }
+	}
+	public static void setAllDisabledOf(boolean state, Class<?> type) {
+	   for (ChatListener cl : chatListeners) {
+	     if (type.isInstance(cl)) cl.setDisabled(state);
+	   }
+	}
+	public static void setAllDisabledOf(boolean state, Class<?>... types) {
+	  for (Class<?> type : types) {
+	    setAllDisabledOf(state, type);
+	  }
+	}
+  public static ArrayList<ChatListener> getListeners() {
+    return chatListeners;
+  }
+  
+	
+	// CONSTRUCTOR RELATED METHODS
+  // -----------------------------------------------------------------
+	public ChatListener(boolean register) {
+	  setDisabled(true);
+	  if (register) register();
+	}
+	private void register() {
+	  chatListeners.add(this);
+	}
+	public void enable() {
+	  setDisabled(false);
+	}
+	
+	
+	// STATE MANAGEMENT
+  // -----------------------------------------------------------------
+	private boolean isDisabled = false;
+	public void setDisabled(Boolean state) {
+	  isDisabled = state;
+	}
+	public boolean isDisabled() {
+	  return isDisabled;
+	}
+	
+	
+	// CORE HANDLING
+	// -----------------------------------------------------------------
+	private void prepare(final Connection connection) {
 		this.setConnection(connection);
 	}
 	
-	private void init(final Connection connection, final Object object) {
-		init(connection);
+	private void prepare(final Connection connection, final Object object) {
+		prepare(connection);
 		this.setObject(object);
 	}
 	
-	private void term() {
+	private void forget() {
 		this.setConnection(null);
 		this.setObject(null);
 	}
 	
-//	private boolean chatObjectReceived = false;
-	
-	private boolean isDisabled = false;
-	public void setDisabled(Boolean state) {
-		isDisabled = state;
-	}
-	public boolean isDisabled() {
-		return isDisabled;
-	}
-	
 	public void connected(final Connection connection) {
-		init(connection);
+		prepare(connection);
 		
 		connected();
 		
-		term();
+		forget();
 	}
 	
 	public void received(final Connection connection, final Object object) {
@@ -56,7 +101,7 @@ public abstract class ChatListener extends Listener {
 		if (object instanceof FrameworkMessage)
 			return;
 		
-		init(connection, object);
+		prepare(connection, object);
 		
 		onReceivedStart(object, connection);
 		
@@ -104,20 +149,23 @@ public abstract class ChatListener extends Listener {
 				
 		onReceivedComplete(chatObjectReceived);
 		
-		term();
+		forget();
 	}
 	
 	public void disconnected(final Connection connection) {
-		init(connection);
+		prepare(connection);
 		
 		if (connection instanceof ChatConnection) {
 			final ChatConnection cc = (ChatConnection) connection;
 			disconnected(cc);
 		}
 		
-		term();
+		forget();
 	}
 	
+	
+	// OVERRIDES
+  // -----------------------------------------------------------------
 	protected void connected() {
 		
 	}
@@ -144,7 +192,7 @@ public abstract class ChatListener extends Listener {
 	
 	protected void received(final ServerChatHistory serverChatHistory, final ChatConnection chatConnection) {
 		String progress = serverChatHistory.getPart() + " of " + serverChatHistory.getTotalParts();
-	  Log.d("ChatListener", "SCH: " + progress + " received.");
+	  Log.e("ChatListener", "SCH: " + progress + " received.");
 	}
 	
 	protected void disconnected(final ChatConnection chatConnection) {
