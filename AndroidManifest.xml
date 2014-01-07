@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ameron32.knbasic.core.chat.MainActivity"
+            android:name="com.ameron32.chatreborn.activities.MainActivity"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
             android:label="@string/app_name"

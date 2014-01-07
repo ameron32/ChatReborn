@@ -49,7 +49,7 @@ public abstract class ChatListener extends Listener {
 	// CONSTRUCTOR RELATED METHODS
   // -----------------------------------------------------------------
 	public ChatListener(boolean register) {
-	  setDisabled(true);
+//	  setDisabled(true);
 	  if (register) register();
 	}
 	private void register() {

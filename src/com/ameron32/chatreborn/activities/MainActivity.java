@@ -1,4 +1,4 @@
-package com.ameron32.knbasic.core.chat;
+package com.ameron32.chatreborn.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +17,9 @@ import android.widget.TextView;
 
 import com.ameron32.chatreborn.chat.Global;
 import com.ameron32.chatreborn.chat.MessageTemplates.MessageTag;
+import com.ameron32.knbasic.core.chat.R;
+import com.ameron32.knbasic.core.chat.StarterFragment;
+import com.ameron32.knbasic.core.chat.R.id;
 import com.ameron32.knbasic.core.helpers.Loader;
 import com.ameron32.knbasic.core.helpers.Loader.Fonts;
 import com.google.android.voiceime.VoiceRecognitionTrigger;

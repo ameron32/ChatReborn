@@ -1,4 +1,4 @@
-package com.ameron32.knbasic.core.chat;
+package com.ameron32.chatreborn.activities;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -47,6 +47,11 @@ import com.ameron32.chatreborn.helpers.SendBar;
 import com.ameron32.chatreborn.services.ChatClient;
 import com.ameron32.chatreborn.services.ChatServer;
 import com.ameron32.chatreborn.services.ChatServer.ChatConnection;
+import com.ameron32.knbasic.core.chat.R;
+import com.ameron32.knbasic.core.chat.R.drawable;
+import com.ameron32.knbasic.core.chat.R.id;
+import com.ameron32.knbasic.core.chat.R.layout;
+import com.ameron32.knbasic.core.chat.R.menu;
 import com.ameron32.knbasic.core.helpers.CustomSlidingLayer;
 import com.ameron32.knbasic.core.helpers.InternalNotification;
 import com.ameron32.knbasic.core.helpers.Loader;
@@ -419,58 +424,7 @@ public class MasterActivity
 	// ------------------------------
 	private CustomSlidingLayer mChatSlidingLayer = null;
 	
-	private void slidingLayerOnSaveInstanceState(Bundle outState) {
-//		if (outState != null) {
-		Log.d("MasterActivity", "openSlidingLayer... @onSave: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
-			outState.putInt("openSlidingLayerAtTimeOfOnSaveInstanceState", openSlidingLayerAtTimeOfOnPause);
-//		}
-	}
-	
-	private void slidingLayerOnRestoreInstanceState(Bundle inState) {
-		if (inState != null) {
-			Log.d("MasterActivity", "isState != null" + " [" + CustomSlidingLayer.numberRegistered() + "]");
-			openSlidingLayerAtTimeOfOnPause = inState.getInt("openSlidingLayerAtTimeOfOnSaveInstanceState");
-//			if (openLayer != CustomSlidingLayer.NULL_ID) {
-//				CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
-//			}
-			Log.d("MasterActivity", "openSlidingLayer... @onRestore: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
-		}
-	}
-	
-//	private void slidingLayerOnCreate() {
-//		// reopen sliders closed when onPause
-//		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
-//			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
-//		}
-//	}
-	
-	private void slidingLayerOnResume() {
-
-	}
-	
-	private void slidingLayerOnPostResume() {
-		// reopen sliders closed when onPause
-		Log.d("MasterActivity", "openSlidingLayer... @onPostResume: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
-		if (openSlidingLayerAtTimeOfOnPause != CustomSlidingLayer.NULL_ID) {
-			CustomSlidingLayer.openSlidingLayer(openSlidingLayerAtTimeOfOnPause);
-		}
-	}
-	
-	private void slidingLayerOnPause() {
-		// remember and close sliders for reopening in onResume
-		Log.d("MasterActivity", "openSlidingLayer... @onPause: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
-		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
-		CustomSlidingLayer.closeAllSlidingLayers();
-		Log.d("MasterActivity", "openSlidingLayer... @onPause: " + openSlidingLayerAtTimeOfOnPause + " [" + CustomSlidingLayer.numberRegistered() + "]");
-	}
-	
-//	private void slidingLayerOnDestroy() {
-//		// remember and close sliders for reopening in onResume
-//		openSlidingLayerAtTimeOfOnPause = CustomSlidingLayer.getIdOfOpenSlidingLayer();
-//		CustomSlidingLayer.closeAllSlidingLayers();
-//	}
-
-	
+		
 	// ------------------------------------------------------------------------------------------------
 	// REQUIRED FOR MESSAGEBAR
 	// ------------------------------------------------------------------------------------------------
