@@ -240,7 +240,6 @@ public class MasterActivity
 	protected void onPause() {
 		Log.d("MasterActivity", "onPause");
 		
-		slidingLayerOnPause();
 		kryonetOnPause();
 		
 		super.onPause();
@@ -252,14 +251,11 @@ public class MasterActivity
 		super.onResume();
 		
 		kryonetOnResume();
-		slidingLayerOnResume();
 	}
 	
 	@Override
 	protected void onPostResume() {
 		super.onPostResume();
-		
-		slidingLayerOnPostResume();
 	}
 
 	@Override
@@ -268,7 +264,6 @@ public class MasterActivity
 		super.onSaveInstanceState(outState);
 
 		messageBarOnSaveInstanceState(outState);
-		slidingLayerOnSaveInstanceState(outState);
 		kryonetOnSaveInstanceState(outState);
 	}
 
@@ -278,7 +273,6 @@ public class MasterActivity
 		super.onRestoreInstanceState(inState);
 
 		messageBarOnRestoreInstanceState(inState);
-		slidingLayerOnRestoreInstanceState(inState);
 		kryonetOnRestoreInstanceState(inState);
 	}
 
@@ -446,6 +440,31 @@ public class MasterActivity
 		mMessageBar = new MessageBar(layout, true);
 	}
 
+	
+	// ------------------------------------------------------------------------------------------------
+  // Universal Image Loader
+  // ------------------------------------------------------------------------------------------------
+  
+  private ImageLoader imageLoader;
+  public ImageLoader getImageLoader() {
+    return imageLoader;
+  }
+  
+  private void universalImageLoaderInit(Bundle inState) {
+    File cacheDir = StorageUtils.getCacheDirectory(MasterActivity.this);
+    ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+        MasterActivity.this).memoryCacheExtraOptions(320, 448) 
+        // default = device screen dimensions
+        .build();
+    imageLoader = ImageLoader.getInstance();
+    imageLoader.init(config);
+
+  }
+  
+  private void universalImageLoaderTerm() {
+    imageLoader.destroy();
+  }
+	
 	
 	// ------------------------------------------------------------------------------------------------
 	// MY KRYONET IMPLEMENTATION
@@ -802,31 +821,6 @@ public class MasterActivity
 	}
 	
 
-	// ------------------------------------------------------------------------------------------------
-	// Universal Image Loader
-	// ------------------------------------------------------------------------------------------------
-	
-	private ImageLoader imageLoader;
-	public ImageLoader getImageLoader() {
-		return imageLoader;
-	}
-	
-	private void universalImageLoaderInit(Bundle inState) {
-		File cacheDir = StorageUtils.getCacheDirectory(MasterActivity.this);
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-				MasterActivity.this).memoryCacheExtraOptions(320, 448) // default
-																		// =
-																		// device
-																		// screen
-																		// dimensions
-				.build();
-		imageLoader = ImageLoader.getInstance();
-		imageLoader.init(config);
 
-	}
-	
-	private void universalImageLoaderTerm() {
-		imageLoader.destroy();
-	}
 
 }
